@@ -28,35 +28,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .el-name{line-height:1;color:rgba(0,0,0,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
 .placeholder{border-radius:4px;border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;color:#aaa;cursor:default}
 .empty{background:transparent;border:none}
-.series-section{margin-top:14px}
+.series-section{margin-top:14px;text-align:center}
 .series-title{font-size:12px;color:#666;margin-bottom:4px;font-weight:500}
-.series-row{display:flex;gap:2px;overflow-x:auto;padding-bottom:4px}
+.series-row{display:flex;gap:2px;overflow-x:auto;padding-bottom:4px;justify-content:center}
 
 /* Detail panel */
-.detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
-.detail-card{background:#fff;border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
-.detail-header{padding:20px 20px 16px;border-radius:12px 12px 0 0;position:relative}
-.detail-sym{font-size:64px;font-weight:700;line-height:1;color:rgba(0,0,0,0.8)}
-.detail-name{font-size:22px;font-weight:600;color:#222;margin-top:4px}
-.detail-sub{font-size:13px;color:rgba(0,0,0,0.5);margin-top:2px}
-.detail-body{padding:16px 20px 20px}
-.close-btn{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,0.55);line-height:1}
+.detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:clamp(8px,3vw,20px)}
+.detail-card{background:#fff;border-radius:12px;width:100%;max-width:min(520px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18);display:flex;flex-direction:column}
+.detail-header{padding:clamp(12px,3vw,20px) clamp(12px,3vw,20px) clamp(10px,2vw,16px);border-radius:12px 12px 0 0;position:relative;flex-shrink:0}
+.detail-sym{font-size:clamp(36px,10vw,64px);font-weight:700;line-height:1;color:rgba(0,0,0,0.8)}
+.detail-name{font-size:clamp(15px,4vw,22px);font-weight:600;color:#222;margin-top:4px}
+.detail-sub{font-size:clamp(11px,2.5vw,13px);color:rgba(0,0,0,0.5);margin-top:2px}
+.detail-body{padding:clamp(10px,2.5vw,16px) clamp(12px,3vw,20px) clamp(12px,3vw,20px);overflow-y:auto}
+.close-btn{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:clamp(26px,6vw,32px);height:clamp(26px,6vw,32px);cursor:pointer;font-size:clamp(14px,3.5vw,18px);display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,0.55);line-height:1}
 .close-btn:hover{background:rgba(0,0,0,0.2)}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.stat-card{background:#f5f5f5;border-radius:8px;padding:10px 12px}
-.stat-label{font-size:11px;color:#888}
-.stat-val{font-size:17px;font-weight:600;color:#222;margin-top:2px}
-.info-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #eee}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.stat-card{background:#f5f5f5;border-radius:8px;padding:clamp(6px,1.5vw,10px) clamp(8px,2vw,12px)}
+.stat-label{font-size:clamp(10px,2.2vw,11px);color:#888}
+.stat-val{font-size:clamp(13px,3.5vw,17px);font-weight:600;color:#222;margin-top:2px}
+.info-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #eee}
 .info-row:last-child{border-bottom:none}
-.info-label{font-size:12px;color:#888;min-width:48px;padding-top:1px;font-weight:500}
-.info-val{font-size:13px;color:#333;line-height:1.5}
-.atom-canvas{display:block;margin:8px auto}
-.electron-info{background:#f0f4ff;border-radius:8px;padding:10px 12px;margin-top:10px}
-.electron-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.e-chip{background:#fff;border:1px solid #ccd6f0;border-radius:6px;padding:3px 9px;font-size:11px;color:#334}
-.e-total{font-size:11px;color:#778;margin-top:6px}
-.atom-title{font-size:13px;font-weight:600;color:#333;margin-top:14px;margin-bottom:6px}
+.info-label{font-size:clamp(11px,2.5vw,12px);color:#888;min-width:44px;padding-top:1px;font-weight:500;flex-shrink:0}
+.info-val{font-size:clamp(11px,2.5vw,13px);color:#333;line-height:1.5}
+.atom-canvas{display:block;margin:6px auto}
+.electron-info{background:#f0f4ff;border-radius:8px;padding:clamp(8px,2vw,10px) clamp(10px,2.5vw,12px);margin-top:8px}
+.electron-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.e-chip{background:#fff;border:1px solid #ccd6f0;border-radius:6px;padding:2px 7px;font-size:clamp(10px,2.2vw,11px);color:#334}
+.e-total{font-size:clamp(10px,2.2vw,11px);color:#778;margin-top:5px}
+.atom-title{font-size:clamp(12px,2.8vw,13px);font-weight:600;color:#333;margin-top:12px;margin-bottom:5px}
 .hint{margin-top:10px;text-align:center;font-size:11px;color:#aaa}
+@media(max-width:400px){
+  .detail-panel{padding:0}
+  .detail-card{border-radius:12px 12px 0 0;max-height:95vh;position:fixed;bottom:0;left:0;right:0;width:100%}
+}
 </style>
 </head>
 <body>
@@ -337,13 +341,20 @@ function showDetail(el) {
     '총 전자 수: ' + el.e.reduce((a,b) => a+b, 0) + '개';
 
   drawAtom(el);
+  window._currentEl = el;
   document.getElementById('detail-panel').style.display = 'flex';
 }
 
 function drawAtom(el) {
   const canvas = document.getElementById('atom-canvas');
   const ctx    = canvas.getContext('2d');
-  const W = 220, H = 220, cx = W/2, cy = H/2;
+  const cardW  = document.querySelector('.detail-card').offsetWidth || 320;
+  const size   = Math.max(160, Math.min(260, Math.floor(cardW * 0.72)));
+  canvas.width  = size;
+  canvas.height = size;
+  canvas.style.width  = size + 'px';
+  canvas.style.height = size + 'px';
+  const W = size, H = size, cx = W/2, cy = H/2;
   ctx.clearRect(0, 0, W, H);
 
   const shells  = el.e.length;
@@ -411,7 +422,12 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 renderGrid();
 window.addEventListener('resize', () => {
   clearTimeout(window._resizeTimer);
-  window._resizeTimer = setTimeout(renderGrid, 100);
+  window._resizeTimer = setTimeout(() => {
+    renderGrid();
+    if (document.getElementById('detail-panel').style.display !== 'none' && window._currentEl) {
+      drawAtom(window._currentEl);
+    }
+  }, 100);
 });
 </script>
 </body>
