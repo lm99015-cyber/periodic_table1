@@ -9,75 +9,64 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#222}
 .pt-wrap{padding:12px;max-width:100%}
 .pt-title{font-size:18px;font-weight:600;color:#222;margin-bottom:12px;text-align:center}
-.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-.legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.leg-item{display:flex;align-items:center;gap:4px;font-size:12px;color:#555}
-.leg-dot{width:12px;height:12px;border-radius:2px;border:1px solid rgba(0,0,0,0.2)}
-.filter-btn{font-size:11px;padding:4px 10px;border:1px solid #bbb;border-radius:6px;background:#fff;color:#555;cursor:pointer;transition:all 0.15s}
-.filter-btn:hover{background:#eee}
-.filter-btn.active{background:#e8e8e8;color:#222;border-color:#888;font-weight:500}
+.controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;justify-content:center}
+.filter-btn{font-size:12px;padding:5px 14px;border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;background:#fff;color:#444;cursor:pointer;transition:all 0.15s;font-weight:500;display:flex;align-items:center;gap:5px}
+.filter-btn:hover{border-color:rgba(0,0,0,0.3);filter:brightness(0.95)}
+.filter-btn.active{border-color:rgba(0,0,0,0.35);filter:brightness(0.88);font-weight:600;color:#222}
+.filter-btn .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,0.15)}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .pt-grid{display:inline-grid;gap:2px}
 .period-label{display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;font-weight:500}
 .group-label{display:flex;align-items:center;justify-content:center;font-size:9px;color:#aaa;padding-bottom:2px}
 .el-cell{border-radius:4px;border:1px solid rgba(0,0,0,0.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform 0.1s,box-shadow 0.1s;overflow:hidden}
-.el-cell:hover{transform:scale(1.12);z-index:10;box-shadow:0 3px 10px rgba(0,0,0,0.2)}
+.el-cell:hover{transform:scale(1.05);z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.15)}
 .el-cell.dimmed{opacity:0.15}
 .el-num{line-height:1;color:rgba(0,0,0,0.5)}
 .el-sym{font-weight:600;line-height:1.1;color:rgba(0,0,0,0.85)}
 .el-name{line-height:1;color:rgba(0,0,0,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
 .placeholder{border-radius:4px;border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;color:#aaa;cursor:default}
 .empty{background:transparent;border:none}
-.series-section{margin-top:14px;text-align:center}
-.series-title{font-size:12px;color:#666;margin-bottom:4px;font-weight:500}
-.series-row{display:flex;gap:2px;overflow-x:auto;padding-bottom:4px;justify-content:center}
+.series-section{margin-top:14px;overflow-x:auto}
+.series-title{font-size:12px;color:#666;margin-bottom:4px;font-weight:500;padding-left:2px}
+.series-row{display:flex;gap:2px;padding-bottom:4px;flex-shrink:0}
 
 /* Detail panel */
-.detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:clamp(8px,3vw,20px)}
-.detail-card{background:#fff;border-radius:12px;width:100%;max-width:min(520px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18);display:flex;flex-direction:column}
-.detail-header{padding:clamp(12px,3vw,20px) clamp(12px,3vw,20px) clamp(10px,2vw,16px);border-radius:12px 12px 0 0;position:relative;flex-shrink:0}
-.detail-sym{font-size:clamp(36px,10vw,64px);font-weight:700;line-height:1;color:rgba(0,0,0,0.8)}
-.detail-name{font-size:clamp(15px,4vw,22px);font-weight:600;color:#222;margin-top:4px}
-.detail-sub{font-size:clamp(11px,2.5vw,13px);color:rgba(0,0,0,0.5);margin-top:2px}
-.detail-body{padding:clamp(10px,2.5vw,16px) clamp(12px,3vw,20px) clamp(12px,3vw,20px);overflow-y:auto}
-.close-btn{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:clamp(26px,6vw,32px);height:clamp(26px,6vw,32px);cursor:pointer;font-size:clamp(14px,3.5vw,18px);display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,0.55);line-height:1}
-.close-btn:hover{background:rgba(0,0,0,0.2)}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
-.stat-card{background:#f5f5f5;border-radius:8px;padding:clamp(6px,1.5vw,10px) clamp(8px,2vw,12px)}
-.stat-label{font-size:clamp(10px,2.2vw,11px);color:#888}
-.stat-val{font-size:clamp(13px,3.5vw,17px);font-weight:600;color:#222;margin-top:2px}
-.info-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #eee}
+.detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:clamp(8px,2vh,20px)}
+.detail-card{background:#fff;border-radius:12px;width:100%;max-width:460px;height:96vh;box-shadow:0 8px 32px rgba(0,0,0,0.18);position:relative;display:flex;flex-direction:column;overflow:hidden}
+.detail-header{padding:clamp(10px,2vh,18px) clamp(12px,3vw,20px) clamp(8px,1.5vh,14px);border-radius:12px 12px 0 0;flex-shrink:0;position:relative}
+.detail-body{flex:1;padding:clamp(8px,1.5vh,14px) clamp(12px,3vw,20px);display:flex;flex-direction:column;gap:clamp(4px,0.8vh,8px);overflow:hidden;min-height:0}
+.close-btn{position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,0.55);line-height:1}
+.close-btn:hover{background:rgba(0,0,0,0.22)}
+.detail-sym{font-size:clamp(32px,7vh,60px);font-weight:700;line-height:1;color:rgba(0,0,0,0.8)}
+.detail-name{font-size:clamp(14px,2.5vh,20px);font-weight:600;color:#222;margin-top:2px}
+.detail-sub{font-size:clamp(10px,1.6vh,13px);color:rgba(0,0,0,0.45);margin-top:1px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(4px,0.7vh,7px);flex-shrink:0}
+.stat-card{background:#f5f5f5;border-radius:7px;padding:clamp(5px,0.9vh,9px) clamp(8px,1.5vw,12px)}
+.stat-label{font-size:clamp(9px,1.4vh,11px);color:#888}
+.stat-val{font-size:clamp(12px,2vh,16px);font-weight:600;color:#222;margin-top:1px}
+.info-rows{flex-shrink:0;border-top:1px solid #eee}
+.info-row{display:flex;gap:10px;padding:clamp(4px,0.7vh,7px) 0;border-bottom:1px solid #eee}
 .info-row:last-child{border-bottom:none}
-.info-label{font-size:clamp(11px,2.5vw,12px);color:#888;min-width:44px;padding-top:1px;font-weight:500;flex-shrink:0}
-.info-val{font-size:clamp(11px,2.5vw,13px);color:#333;line-height:1.5}
-.atom-canvas{display:block;margin:6px auto}
-.electron-info{background:#f0f4ff;border-radius:8px;padding:clamp(8px,2vw,10px) clamp(10px,2.5vw,12px);margin-top:8px}
-.electron-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
-.e-chip{background:#fff;border:1px solid #ccd6f0;border-radius:6px;padding:2px 7px;font-size:clamp(10px,2.2vw,11px);color:#334}
-.e-total{font-size:clamp(10px,2.2vw,11px);color:#778;margin-top:5px}
-.atom-title{font-size:clamp(12px,2.8vw,13px);font-weight:600;color:#333;margin-top:12px;margin-bottom:5px}
+.info-label{font-size:clamp(10px,1.5vh,12px);color:#888;min-width:40px;padding-top:1px;font-weight:500;flex-shrink:0}
+.info-val{font-size:clamp(10px,1.5vh,12px);color:#333;line-height:1.4}
+.atom-section{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,0.6vh,8px);min-height:0}
+.atom-title{font-size:clamp(11px,1.6vh,13px);font-weight:600;color:#333;align-self:flex-start}
+.atom-canvas{display:block;margin:0 auto;flex-shrink:0}
+.electron-info{background:#f0f4ff;border-radius:8px;padding:clamp(6px,1vh,10px) clamp(8px,1.5vw,12px);width:100%;flex-shrink:0}
+.electron-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.e-chip{background:#fff;border:1px solid #ccd6f0;border-radius:5px;padding:2px 6px;font-size:clamp(9px,1.4vh,11px);color:#334}
+.e-total{font-size:clamp(9px,1.4vh,11px);color:#778;margin-top:4px}
 .hint{margin-top:10px;text-align:center;font-size:11px;color:#aaa}
-@media(max-width:400px){
-  .detail-panel{padding:0}
-  .detail-card{border-radius:12px 12px 0 0;max-height:95vh;position:fixed;bottom:0;left:0;right:0;width:100%}
-}
 </style>
 </head>
 <body>
 <div class="pt-wrap">
   <div class="pt-title">주기율표 (원자번호 1–103)</div>
   <div class="controls">
-    <div class="legend">
-      <div class="leg-item"><div class="leg-dot" style="background:#85B7EB"></div>금속</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#C0DD97"></div>준금속</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#FAC775"></div>비금속</div>
-    </div>
-    <div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap">
-      <button class="filter-btn active" data-cat="all">전체</button>
-      <button class="filter-btn" data-cat="metal">금속</button>
-      <button class="filter-btn" data-cat="metalloid">준금속</button>
-      <button class="filter-btn" data-cat="nonmetal">비금속</button>
-    </div>
+    <button class="filter-btn active" data-cat="all" style="background:#f0f0f0">전체</button>
+    <button class="filter-btn" data-cat="metal" style="background:#85B7EB"><span class="dot" style="background:#378ADD"></span>금속</button>
+    <button class="filter-btn" data-cat="metalloid" style="background:#C0DD97"><span class="dot" style="background:#639922"></span>준금속</button>
+    <button class="filter-btn" data-cat="nonmetal" style="background:#FAC775"><span class="dot" style="background:#BA7517"></span>비금속</button>
   </div>
   <div class="table-scroll">
     <div id="pt-grid" class="pt-grid"></div>
@@ -95,7 +84,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- Detail Panel -->
 <div class="detail-panel" id="detail-panel" style="display:none">
-  <div class="detail-card">
+  <div class="detail-card" id="detail-card">
     <div class="detail-header" id="detail-header">
       <button class="close-btn" id="close-btn">✕</button>
       <div class="detail-sym" id="d-sym"></div>
@@ -109,15 +98,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="stat-card"><div class="stat-label">주기 / 족</div><div class="stat-val" id="d-pg"></div></div>
         <div class="stat-card"><div class="stat-label">분류</div><div class="stat-val" id="d-cat"></div></div>
       </div>
-      <div class="info-row"><div class="info-label">설명</div><div class="info-val" id="d-desc"></div></div>
-      <div class="info-row"><div class="info-label">용도</div><div class="info-val" id="d-uses"></div></div>
-      <div class="info-row"><div class="info-label">발견</div><div class="info-val" id="d-disc"></div></div>
-      <div class="atom-title">원자 구조</div>
-      <canvas id="atom-canvas" class="atom-canvas" width="220" height="220"></canvas>
-      <div class="electron-info">
-        <div style="font-size:11px;color:#667;font-weight:500">전자 껍질 배치</div>
-        <div class="electron-chips" id="e-chips"></div>
-        <div class="e-total" id="e-total"></div>
+      <div class="info-rows">
+        <div class="info-row"><div class="info-label">설명</div><div class="info-val" id="d-desc"></div></div>
+        <div class="info-row"><div class="info-label">용도</div><div class="info-val" id="d-uses"></div></div>
+        <div class="info-row"><div class="info-label">발견</div><div class="info-val" id="d-disc"></div></div>
+      </div>
+      <div class="atom-section">
+        <div class="atom-title">원자 구조</div>
+        <canvas id="atom-canvas" class="atom-canvas"></canvas>
+        <div class="electron-info">
+          <div style="font-size:11px;color:#667;font-weight:500">전자 껍질 배치</div>
+          <div class="electron-chips" id="e-chips"></div>
+          <div class="e-total" id="e-total"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -304,10 +297,22 @@ function renderGrid() {
     }
   }
 
-  // series rows
+  // series rows — align with main grid
+  // Main grid width = 40px (period label) + 18 * (size+2) px (cells+gap)
+  // 란타넘족 starts at group 3, so left offset = 40px + 2*(size+2)px
+  const cellStep = size + 2; // cell size + gap
+  const seriesLeftOffset = 40 + 2 * cellStep; // period-label + group1 + group2
+  const seriesWidth = 15 * cellStep - 2; // 15 cells
+
   ['lant-row','act-row'].forEach((rowId, idx) => {
+    const section = document.getElementById(rowId).parentElement;
+    section.style.paddingLeft = seriesLeftOffset + 'px';
+
     const row = document.getElementById(rowId);
     row.innerHTML = '';
+    row.style.width = seriesWidth + 'px';
+    row.style.justifyContent = 'flex-start';
+
     const start = idx === 0 ? 57 : 89;
     for (let n = start; n < start + 15; n++) {
       const el = ELEMENTS.find(e => e.num === n);
@@ -340,29 +345,41 @@ function showDetail(el) {
   document.getElementById('e-total').textContent =
     '총 전자 수: ' + el.e.reduce((a,b) => a+b, 0) + '개';
 
-  drawAtom(el);
-  window._currentEl = el;
   document.getElementById('detail-panel').style.display = 'flex';
+  window._currentEl = el;
+  requestAnimationFrame(() => drawAtom(el));
 }
 
 function drawAtom(el) {
-  const canvas = document.getElementById('atom-canvas');
-  const ctx    = canvas.getContext('2d');
-  const cardW  = document.querySelector('.detail-card').offsetWidth || 320;
-  const size   = Math.max(160, Math.min(260, Math.floor(cardW * 0.72)));
+  const canvas   = document.getElementById('atom-canvas');
+  const ctx      = canvas.getContext('2d');
+  const section  = document.querySelector('.atom-section');
+  const eInfo    = document.querySelector('.electron-info');
+  const atomTitle= document.querySelector('.atom-title');
+  if (!section) return;
+
+  // atom-section의 높이에서 전자 정보 박스·타이틀 높이를 빼서 캔버스 가용 크기 계산
+  const secH    = section.offsetHeight;
+  const secW    = section.offsetWidth;
+  const eInfoH  = eInfo   ? eInfo.offsetHeight   : 60;
+  const titleH  = atomTitle ? atomTitle.offsetHeight : 20;
+  const gap     = 16; // gap 합산 여유
+  const avail   = Math.min(secW - 20, secH - eInfoH - titleH - gap);
+  const size    = Math.max(80, Math.min(200, avail));
+
   canvas.width  = size;
   canvas.height = size;
   canvas.style.width  = size + 'px';
   canvas.style.height = size + 'px';
+
   const W = size, H = size, cx = W/2, cy = H/2;
   ctx.clearRect(0, 0, W, H);
 
-  const shells  = el.e.length;
-  const maxR    = Math.min(cx, cy) - 14;
-  const step    = shells > 0 ? maxR / (shells + 0.5) : 30;
-  const nucR    = Math.min(18, step * 0.5);
+  const shells = el.e.length;
+  const maxR   = Math.min(cx, cy) - 8;
+  const step   = shells > 0 ? maxR / (shells + 0.5) : 20;
+  const nucR   = Math.min(14, step * 0.5);
 
-  // nucleus
   ctx.beginPath();
   ctx.arc(cx, cy, nucR, 0, Math.PI*2);
   ctx.fillStyle = '#E24B4A';
@@ -370,21 +387,20 @@ function drawAtom(el) {
 
   const total = el.e.reduce((a,b) => a+b, 0);
   ctx.fillStyle = 'white';
-  ctx.font = `bold ${Math.min(13, nucR*0.85)}px sans-serif`;
+  ctx.font = `bold ${Math.min(11, nucR*0.85)}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(total+'+', cx, cy);
 
-  // shells
   el.e.forEach((cnt, si) => {
-    const r  = step * (si + 1);
+    const r = step * (si + 1);
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI*2);
     ctx.strokeStyle = '#378ADD';
-    ctx.lineWidth   = 1;
+    ctx.lineWidth = 1;
     ctx.stroke();
 
-    const eR = Math.min(5, step * 0.18);
+    const eR = Math.min(4, step * 0.18);
     for (let i = 0; i < cnt; i++) {
       const angle = (2*Math.PI*i)/cnt - Math.PI/2;
       const ex = cx + r * Math.cos(angle);
@@ -394,7 +410,7 @@ function drawAtom(el) {
       ctx.fillStyle = '#185FA5';
       ctx.fill();
       ctx.fillStyle = 'white';
-      ctx.font = `bold ${Math.max(6, eR*1.4)}px sans-serif`;
+      ctx.font = `bold ${Math.max(5, eR*1.4)}px sans-serif`;
       ctx.fillText('−', ex, ey + 0.5);
     }
   });
