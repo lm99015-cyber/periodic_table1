@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주기율표</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#222}
+.pt-wrap{padding:12px;max-width:100%}
+.pt-title{font-size:18px;font-weight:600;color:#222;margin-bottom:12px;text-align:center}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:12px;color:#555}
+.leg-dot{width:12px;height:12px;border-radius:2px;border:1px solid rgba(0,0,0,0.2)}
+.filter-btn{font-size:11px;padding:4px 10px;border:1px solid #bbb;border-radius:6px;background:#fff;color:#555;cursor:pointer;transition:all 0.15s}
+.filter-btn:hover{background:#eee}
+.filter-btn.active{background:#e8e8e8;color:#222;border-color:#888;font-weight:500}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.pt-grid{display:inline-grid;gap:2px}
+.period-label{display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;font-weight:500}
+.group-label{display:flex;align-items:center;justify-content:center;font-size:9px;color:#aaa;padding-bottom:2px}
+.el-cell{border-radius:4px;border:1px solid rgba(0,0,0,0.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform 0.1s,box-shadow 0.1s;overflow:hidden}
+.el-cell:hover{transform:scale(1.12);z-index:10;box-shadow:0 3px 10px rgba(0,0,0,0.2)}
+.el-cell.dimmed{opacity:0.15}
+.el-num{line-height:1;color:rgba(0,0,0,0.5)}
+.el-sym{font-weight:600;line-height:1.1;color:rgba(0,0,0,0.85)}
+.el-name{line-height:1;color:rgba(0,0,0,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
+.placeholder{border-radius:4px;border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;color:#aaa;cursor:default}
+.empty{background:transparent;border:none}
+.series-section{margin-top:14px}
+.series-title{font-size:12px;color:#666;margin-bottom:4px;font-weight:500}
+.series-row{display:flex;gap:2px;overflow-x:auto;padding-bottom:4px}
+
+/* Detail panel */
+.detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.detail-card{background:#fff;border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.detail-header{padding:20px 20px 16px;border-radius:12px 12px 0 0;position:relative}
+.detail-sym{font-size:64px;font-weight:700;line-height:1;color:rgba(0,0,0,0.8)}
+.detail-name{font-size:22px;font-weight:600;color:#222;margin-top:4px}
+.detail-sub{font-size:13px;color:rgba(0,0,0,0.5);margin-top:2px}
+.detail-body{padding:16px 20px 20px}
+.close-btn{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,0.55);line-height:1}
+.close-btn:hover{background:rgba(0,0,0,0.2)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.stat-card{background:#f5f5f5;border-radius:8px;padding:10px 12px}
+.stat-label{font-size:11px;color:#888}
+.stat-val{font-size:17px;font-weight:600;color:#222;margin-top:2px}
+.info-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #eee}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:12px;color:#888;min-width:48px;padding-top:1px;font-weight:500}
+.info-val{font-size:13px;color:#333;line-height:1.5}
+.atom-canvas{display:block;margin:8px auto}
+.electron-info{background:#f0f4ff;border-radius:8px;padding:10px 12px;margin-top:10px}
+.electron-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.e-chip{background:#fff;border:1px solid #ccd6f0;border-radius:6px;padding:3px 9px;font-size:11px;color:#334}
+.e-total{font-size:11px;color:#778;margin-top:6px}
+.atom-title{font-size:13px;font-weight:600;color:#333;margin-top:14px;margin-bottom:6px}
+.hint{margin-top:10px;text-align:center;font-size:11px;color:#aaa}
+</style>
+</head>
+<body>
+<div class="pt-wrap">
+  <div class="pt-title">주기율표 (원자번호 1–103)</div>
+  <div class="controls">
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#85B7EB"></div>금속</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#C0DD97"></div>준금속</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#FAC775"></div>비금속</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap">
+      <button class="filter-btn active" data-cat="all">전체</button>
+      <button class="filter-btn" data-cat="metal">금속</button>
+      <button class="filter-btn" data-cat="metalloid">준금속</button>
+      <button class="filter-btn" data-cat="nonmetal">비금속</button>
+    </div>
+  </div>
+  <div class="table-scroll">
+    <div id="pt-grid" class="pt-grid"></div>
+  </div>
+  <div class="series-section">
+    <div class="series-title">란타넘족 (57–71)</div>
+    <div class="series-row" id="lant-row"></div>
+  </div>
+  <div class="series-section">
+    <div class="series-title">악티늄족 (89–103)</div>
+    <div class="series-row" id="act-row"></div>
+  </div>
+  <div class="hint">원소를 클릭하면 상세 정보를 볼 수 있습니다</div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-panel" id="detail-panel" style="display:none">
+  <div class="detail-card">
+    <div class="detail-header" id="detail-header">
+      <button class="close-btn" id="close-btn">✕</button>
+      <div class="detail-sym" id="d-sym"></div>
+      <div class="detail-name" id="d-name"></div>
+      <div class="detail-sub" id="d-sub"></div>
+    </div>
+    <div class="detail-body">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">원자번호</div><div class="stat-val" id="d-num"></div></div>
+        <div class="stat-card"><div class="stat-label">원자량</div><div class="stat-val" id="d-mass"></div></div>
+        <div class="stat-card"><div class="stat-label">주기 / 족</div><div class="stat-val" id="d-pg"></div></div>
+        <div class="stat-card"><div class="stat-label">분류</div><div class="stat-val" id="d-cat"></div></div>
+      </div>
+      <div class="info-row"><div class="info-label">설명</div><div class="info-val" id="d-desc"></div></div>
+      <div class="info-row"><div class="info-label">용도</div><div class="info-val" id="d-uses"></div></div>
+      <div class="info-row"><div class="info-label">발견</div><div class="info-val" id="d-disc"></div></div>
+      <div class="atom-title">원자 구조</div>
+      <canvas id="atom-canvas" class="atom-canvas" width="220" height="220"></canvas>
+      <div class="electron-info">
+        <div style="font-size:11px;color:#667;font-weight:500">전자 껍질 배치</div>
+        <div class="electron-chips" id="e-chips"></div>
+        <div class="e-total" id="e-total"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ELEMENTS = [
+  {sym:"H",name:"수소",num:1,mass:1.008,period:1,group:1,cat:"nonmetal",e:[1],desc:"가장 간단한 원소로, 우주에서 가장 풍부한 원소입니다.",uses:"연료전지, 암모니아 합성, 수소화 반응",disc:"1766년 헨리 캐번디시"},
+  {sym:"He",name:"헬륨",num:2,mass:4.003,period:1,group:18,cat:"nonmetal",e:[2],desc:"불활성 기체로, 공기보다 가벼워 풍선에 사용됩니다.",uses:"풍선, 저온냉각, 호흡용 기체 혼합물",disc:"1868년 피에르 장센"},
+  {sym:"Li",name:"리튬",num:3,mass:6.94,period:2,group:1,cat:"metal",e:[2,1],desc:"가장 가벼운 금속으로, 배터리에 널리 사용됩니다.",uses:"리튬 배터리, 정신과 약물, 합금",disc:"1817년 요한 아르페드손"},
+  {sym:"Be",name:"베릴륨",num:4,mass:9.012,period:2,group:2,cat:"metal",e:[2,2],desc:"독성이 있지만 우주항공 분야에서 중요한 경량 금속입니다.",uses:"우주항공 합금, X선 창문, 핵반응로",disc:"1797년 루이 보클랭"},
+  {sym:"B",name:"붕소",num:5,mass:10.81,period:2,group:13,cat:"metalloid",e:[2,3],desc:"준금속으로, 유리와 세라믹 제조에 사용됩니다.",uses:"붕규산 유리, 세제, 방부제",disc:"1808년 험프리 데이비"},
+  {sym:"C",name:"탄소",num:6,mass:12.01,period:2,group:14,cat:"nonmetal",e:[2,4],desc:"생명체의 기본 구성 요소이며 다이아몬드와 흑연의 성분입니다.",uses:"플라스틱, 강철, 다이아몬드, 연료",disc:"고대부터 알려짐"},
+  {sym:"N",name:"질소",num:7,mass:14.01,period:2,group:15,cat:"nonmetal",e:[2,5],desc:"대기의 78%를 차지하며, 단백질과 DNA의 구성요소입니다.",uses:"비료, 폭발물, 액체질소 냉각",disc:"1772년 다니엘 러더퍼드"},
+  {sym:"O",name:"산소",num:8,mass:16.00,period:2,group:16,cat:"nonmetal",e:[2,6],desc:"생명 유지에 필수적이며, 연소와 호흡에 관여합니다.",uses:"호흡, 연소, 의료용 산소, 로켓 연료",disc:"1774년 조제프 프리스틀리"},
+  {sym:"F",name:"플루오린",num:9,mass:19.00,period:2,group:17,cat:"nonmetal",e:[2,7],desc:"가장 반응성이 높은 원소로, 치약의 충치 예방 성분입니다.",uses:"치약, 테프론, 냉매, 우라늄 농축",disc:"1886년 앙리 무아상"},
+  {sym:"Ne",name:"네온",num:10,mass:20.18,period:2,group:18,cat:"nonmetal",e:[2,8],desc:"불활성 기체로, 네온사인의 주황빛을 만들어냅니다.",uses:"네온사인, 레이저, 저온냉각",disc:"1898년 윌리엄 램지"},
+  {sym:"Na",name:"나트륨",num:11,mass:22.99,period:3,group:1,cat:"metal",e:[2,8,1],desc:"소금의 구성 성분으로, 생체 내 전해질 균형에 중요합니다.",uses:"소금, 비누, 가로등(나트륨등)",disc:"1807년 험프리 데이비"},
+  {sym:"Mg",name:"마그네슘",num:12,mass:24.31,period:3,group:2,cat:"metal",e:[2,8,2],desc:"가벼우면서도 강한 금속으로, 합금 제조에 널리 사용됩니다.",uses:"항공기 부품, 자동차 휠, 플래시 촬영",disc:"1755년 조제프 블랙"},
+  {sym:"Al",name:"알루미늄",num:13,mass:26.98,period:3,group:13,cat:"metal",e:[2,8,3],desc:"가벼우면서 내식성이 뛰어난 금속으로 포장재에 많이 사용됩니다.",uses:"알루미늄 포일, 항공기, 음료수 캔",disc:"1825년 한스 외르스테드"},
+  {sym:"Si",name:"규소",num:14,mass:28.09,period:3,group:14,cat:"metalloid",e:[2,8,4],desc:"지각에서 두 번째로 풍부한 원소로, 반도체의 핵심 재료입니다.",uses:"컴퓨터 칩, 태양전지, 유리",disc:"1823년 욘스 베르셀리우스"},
+  {sym:"P",name:"인",num:15,mass:30.97,period:3,group:15,cat:"nonmetal",e:[2,8,5],desc:"DNA와 ATP의 구성 성분으로, 생명체에 필수적인 원소입니다.",uses:"비료, 성냥, 세제, 뼈와 치아",disc:"1669년 헤니히 브란트"},
+  {sym:"S",name:"황",num:16,mass:32.07,period:3,group:16,cat:"nonmetal",e:[2,8,6],desc:"단백질의 구성 성분이며, 고무 가황과 산업에서 중요합니다.",uses:"타이어, 화약, 황산, 의약품",disc:"고대부터 알려짐"},
+  {sym:"Cl",name:"염소",num:17,mass:35.45,period:3,group:17,cat:"nonmetal",e:[2,8,7],desc:"강력한 산화제로, 소독과 표백에 널리 사용됩니다.",uses:"수돗물 소독, 표백제, 소금, 플라스틱",disc:"1774년 칼 빌헬름 셸레"},
+  {sym:"Ar",name:"아르곤",num:18,mass:39.95,period:3,group:18,cat:"nonmetal",e:[2,8,8],desc:"대기 중에서 세 번째로 많은 불활성 기체입니다.",uses:"용접용 보호가스, 백열전구, 레이저",disc:"1894년 로드 레일리"},
+  {sym:"K",name:"칼륨",num:19,mass:39.10,period:4,group:1,cat:"metal",e:[2,8,8,1],desc:"식물 성장에 필수적이며, 신경 전달에 중요한 역할을 합니다.",uses:"비료, 화약, 의약품, 전해질",disc:"1807년 험프리 데이비"},
+  {sym:"Ca",name:"칼슘",num:20,mass:40.08,period:4,group:2,cat:"metal",e:[2,8,8,2],desc:"뼈와 치아의 주성분이며, 근육 수축에 필수적입니다.",uses:"시멘트, 석고, 칼슘 보충제, 치즈",disc:"1808년 험프리 데이비"},
+  {sym:"Sc",name:"스칸듐",num:21,mass:44.96,period:4,group:3,cat:"metal",e:[2,8,9,2],desc:"가벼운 희토류 금속으로, 알루미늄 합금을 강화시킵니다.",uses:"항공우주 합금, 야구 배트, 자전거 프레임",disc:"1879년 라르스 닐손"},
+  {sym:"Ti",name:"타이타늄",num:22,mass:47.87,period:4,group:4,cat:"metal",e:[2,8,10,2],desc:"강하고 가벼우며 부식에 강한 금속입니다.",uses:"항공기, 임플란트, 페인트, 스포츠 용품",disc:"1791년 윌리엄 그레고르"},
+  {sym:"V",name:"바나듐",num:23,mass:50.94,period:4,group:5,cat:"metal",e:[2,8,11,2],desc:"강철에 첨가하면 강도와 인성을 크게 향상시킵니다.",uses:"고속도강, 공구, 스프링, 촉매",disc:"1801년 안드레스 델 리오"},
+  {sym:"Cr",name:"크롬",num:24,mass:52.00,period:4,group:6,cat:"metal",e:[2,8,13,1],desc:"내식성과 광택이 뛰어나 도금에 사용됩니다.",uses:"스테인리스강, 크롬 도금, 페인트",disc:"1797년 루이 보클랭"},
+  {sym:"Mn",name:"망가니즈",num:25,mass:54.94,period:4,group:7,cat:"metal",e:[2,8,13,2],desc:"강철 제조에 필수적이며, 알루미늄 캔에도 사용됩니다.",uses:"강철 제조, 건전지, 알루미늄 합금",disc:"1774년 요한 간"},
+  {sym:"Fe",name:"철",num:26,mass:55.85,period:4,group:8,cat:"metal",e:[2,8,14,2],desc:"가장 널리 사용되는 금속으로, 지각에서 네 번째로 풍부합니다.",uses:"건설, 자동차, 기계, 헤모글로빈",disc:"고대부터 알려짐"},
+  {sym:"Co",name:"코발트",num:27,mass:58.93,period:4,group:9,cat:"metal",e:[2,8,15,2],desc:"자성이 강하며, 리튬 배터리의 핵심 성분입니다.",uses:"리튬 배터리, 초합금, 자석, 청색 안료",disc:"1735년 게오르그 브란트"},
+  {sym:"Ni",name:"니켈",num:28,mass:58.69,period:4,group:10,cat:"metal",e:[2,8,16,2],desc:"부식에 강하며, 동전과 배터리에 사용됩니다.",uses:"동전, 스테인리스강, 배터리, 도금",disc:"1751년 악셀 크론스테드"},
+  {sym:"Cu",name:"구리",num:29,mass:63.55,period:4,group:11,cat:"metal",e:[2,8,18,1],desc:"전기 전도성이 뛰어나며, 오래전부터 사용된 금속입니다.",uses:"전선, 배관, 전자제품, 청동",disc:"고대부터 알려짐"},
+  {sym:"Zn",name:"아연",num:30,mass:65.38,period:4,group:12,cat:"metal",e:[2,8,18,2],desc:"철의 부식을 방지하는 도금에 사용되며, 면역 기능에 중요합니다.",uses:"아연 도금, 황동, 건전지, 영양제",disc:"1746년 안드레아스 마르그라프"},
+  {sym:"Ga",name:"갈륨",num:31,mass:69.72,period:4,group:13,cat:"metal",e:[2,8,18,3],desc:"손에 쥐면 녹는 특이한 금속으로, 반도체에 사용됩니다.",uses:"LED, 반도체, 태양전지, 온도계",disc:"1875년 폴 에밀 르코크"},
+  {sym:"Ge",name:"저마늄",num:32,mass:72.63,period:4,group:14,cat:"metalloid",e:[2,8,18,4],desc:"초기 트랜지스터에 사용된 반도체 소재입니다.",uses:"광섬유, 적외선 광학, 트랜지스터",disc:"1886년 클레멘스 빙클러"},
+  {sym:"As",name:"비소",num:33,mass:74.92,period:4,group:15,cat:"metalloid",e:[2,8,18,5],desc:"독성이 강하지만 소량은 반도체 도핑에 사용됩니다.",uses:"반도체 도핑, 목재 방부제, 합금",disc:"고대부터 알려짐"},
+  {sym:"Se",name:"셀레늄",num:34,mass:78.97,period:4,group:16,cat:"nonmetal",e:[2,8,18,6],desc:"광전도성이 있어 태양전지와 복사기에 사용됩니다.",uses:"태양전지, 복사기, 유리 착색, 항산화제",disc:"1817년 욘스 베르셀리우스"},
+  {sym:"Br",name:"브로민",num:35,mass:79.90,period:4,group:17,cat:"nonmetal",e:[2,8,18,7],desc:"상온에서 액체 상태인 유일한 비금속 원소입니다.",uses:"난연제, 소독제, 농약, 사진 필름",disc:"1826년 앙투안 발라르"},
+  {sym:"Kr",name:"크립톤",num:36,mass:83.80,period:4,group:18,cat:"nonmetal",e:[2,8,18,8],desc:"희귀한 불활성 기체로, 고성능 조명에 사용됩니다.",uses:"레이저, 고성능 전구, 단열 창문",disc:"1898년 윌리엄 램지"},
+  {sym:"Rb",name:"루비듐",num:37,mass:85.47,period:5,group:1,cat:"metal",e:[2,8,18,8,1],desc:"반응성이 매우 높은 알칼리 금속입니다.",uses:"원자시계, 광전관",disc:"1861년 로베르트 분젠"},
+  {sym:"Sr",name:"스트론튬",num:38,mass:87.62,period:5,group:2,cat:"metal",e:[2,8,18,8,2],desc:"빨간색 불꽃을 내는 금속입니다.",uses:"불꽃놀이, 신호탄",disc:"1790년 애들레어 크로퍼드"},
+  {sym:"Y",name:"이트륨",num:39,mass:88.91,period:5,group:3,cat:"metal",e:[2,8,18,9,2],desc:"희토류 원소로 초전도체에 사용됩니다.",uses:"LED, 초전도체",disc:"1794년 요한 가돌린"},
+  {sym:"Zr",name:"지르코늄",num:40,mass:91.22,period:5,group:4,cat:"metal",e:[2,8,18,10,2],desc:"내식성이 뛰어난 금속입니다.",uses:"핵연료 피복재, 보석",disc:"1789년 마르틴 클라프로트"},
+  {sym:"Nb",name:"나이오븀",num:41,mass:92.91,period:5,group:5,cat:"metal",e:[2,8,18,12,1],desc:"초전도 자석에 사용됩니다.",uses:"초전도 자석, 합금",disc:"1801년 찰스 해쳇"},
+  {sym:"Mo",name:"몰리브데넘",num:42,mass:95.95,period:5,group:6,cat:"metal",e:[2,8,18,13,1],desc:"고온 강도가 뛰어난 금속입니다.",uses:"합금강, 촉매",disc:"1778년 칼 빌헬름 셸레"},
+  {sym:"Tc",name:"테크네튬",num:43,mass:98.00,period:5,group:7,cat:"metal",e:[2,8,18,13,2],desc:"최초의 인공 원소입니다.",uses:"의료 영상, 부식 방지",disc:"1937년 에밀리오 세그레"},
+  {sym:"Ru",name:"루테늄",num:44,mass:101.07,period:5,group:8,cat:"metal",e:[2,8,18,15,1],desc:"백금족 금속입니다.",uses:"전자부품, 촉매",disc:"1844년 칼 에른스트 클라우스"},
+  {sym:"Rh",name:"로듐",num:45,mass:102.91,period:5,group:9,cat:"metal",e:[2,8,18,16,1],desc:"매우 희귀하고 비싼 금속입니다.",uses:"촉매 변환기, 도금",disc:"1803년 윌리엄 월러스턴"},
+  {sym:"Pd",name:"팔라듐",num:46,mass:106.42,period:5,group:10,cat:"metal",e:[2,8,18,18],desc:"수소를 흡수하는 특성이 있습니다.",uses:"촉매, 치과재료",disc:"1803년 윌리엄 월러스턴"},
+  {sym:"Ag",name:"은",num:47,mass:107.87,period:5,group:11,cat:"metal",e:[2,8,18,18,1],desc:"전기 전도성이 가장 좋은 금속입니다.",uses:"장신구, 전자부품, 사진",disc:"고대부터 알려짐"},
+  {sym:"Cd",name:"카드뮴",num:48,mass:112.41,period:5,group:12,cat:"metal",e:[2,8,18,18,2],desc:"독성이 있는 중금속입니다.",uses:"배터리, 안료",disc:"1817년 프리드리히 슈트로마이어"},
+  {sym:"In",name:"인듐",num:49,mass:114.82,period:5,group:13,cat:"metal",e:[2,8,18,18,3],desc:"부드럽고 전성이 좋은 금속입니다.",uses:"LCD 화면, 반도체",disc:"1863년 페르디난트 라이히"},
+  {sym:"Sn",name:"주석",num:50,mass:118.71,period:5,group:14,cat:"metal",e:[2,8,18,18,4],desc:"청동의 주요 성분입니다.",uses:"청동, 땜납, 도금",disc:"고대부터 알려짐"},
+  {sym:"Sb",name:"안티모니",num:51,mass:121.76,period:5,group:15,cat:"metalloid",e:[2,8,18,18,5],desc:"난연제로 사용되는 준금속입니다.",uses:"난연제, 합금",disc:"고대부터 알려짐"},
+  {sym:"Te",name:"텔루륨",num:52,mass:127.60,period:5,group:16,cat:"metalloid",e:[2,8,18,18,6],desc:"반도체 특성을 가진 준금속입니다.",uses:"태양전지, 합금",disc:"1782년 프란츠 뮐러"},
+  {sym:"I",name:"아이오딘",num:53,mass:126.90,period:5,group:17,cat:"nonmetal",e:[2,8,18,18,7],desc:"갑상선 호르몬의 필수 성분입니다.",uses:"소독제, 의약품, 사진",disc:"1811년 베르나르 쿠르투아"},
+  {sym:"Xe",name:"제논",num:54,mass:131.29,period:5,group:18,cat:"nonmetal",e:[2,8,18,18,8],desc:"불활성 기체로 강력한 조명에 사용됩니다.",uses:"크세논 램프, 마취제",disc:"1898년 윌리엄 램지"},
+  {sym:"Cs",name:"세슘",num:55,mass:132.91,period:6,group:1,cat:"metal",e:[2,8,18,18,8,1],desc:"가장 반응성이 높은 알칼리 금속입니다.",uses:"원자시계, 광전관",disc:"1860년 로베르트 분젠"},
+  {sym:"Ba",name:"바륨",num:56,mass:137.33,period:6,group:2,cat:"metal",e:[2,8,18,18,8,2],desc:"녹색 불꽃을 내는 금속입니다.",uses:"불꽃놀이, X선 조영제",disc:"1808년 험프리 데이비"},
+  {sym:"La",name:"란타넘",num:57,mass:138.91,period:6,group:3,cat:"metal",e:[2,8,18,18,9,2],desc:"란타넘족의 첫 번째 원소입니다.",uses:"촉매, 카메라 렌즈",disc:"1839년 칼 모산더"},
+  {sym:"Ce",name:"세륨",num:58,mass:140.12,period:6,group:3,cat:"metal",e:[2,8,18,19,9,2],desc:"가장 풍부한 희토류 원소입니다.",uses:"촉매 변환기, 연마재",disc:"1803년 마르틴 클라프로트"},
+  {sym:"Pr",name:"프라세오디뮴",num:59,mass:140.91,period:6,group:3,cat:"metal",e:[2,8,18,21,8,2],desc:"녹황색 화합물을 만드는 희토류 원소입니다.",uses:"자석, 유리 착색",disc:"1885년 칼 아우어"},
+  {sym:"Nd",name:"네오디뮴",num:60,mass:144.24,period:6,group:3,cat:"metal",e:[2,8,18,22,8,2],desc:"강력한 자석을 만드는데 사용됩니다.",uses:"네오디뮴 자석, 레이저",disc:"1885년 칼 아우어"},
+  {sym:"Pm",name:"프로메튬",num:61,mass:145.00,period:6,group:3,cat:"metal",e:[2,8,18,23,8,2],desc:"방사성 인공 원소입니다.",uses:"발광 페인트, 원자 배터리",disc:"1945년 제이컵 마린스키"},
+  {sym:"Sm",name:"사마륨",num:62,mass:150.36,period:6,group:3,cat:"metal",e:[2,8,18,24,8,2],desc:"강력한 영구 자석을 만듭니다.",uses:"사마륨 자석, 핵반응로",disc:"1879년 폴 보아보드랑"},
+  {sym:"Eu",name:"유로퓸",num:63,mass:151.96,period:6,group:3,cat:"metal",e:[2,8,18,25,8,2],desc:"형광등의 적색 발광에 사용됩니다.",uses:"형광등, TV 브라운관",disc:"1901년 외젠 데마르세"},
+  {sym:"Gd",name:"가돌리늄",num:64,mass:157.25,period:6,group:3,cat:"metal",e:[2,8,18,25,9,2],desc:"MRI 조영제로 사용됩니다.",uses:"MRI 조영제, 자기냉각",disc:"1880년 장 드 마리냐크"},
+  {sym:"Tb",name:"터븀",num:65,mass:158.93,period:6,group:3,cat:"metal",e:[2,8,18,27,8,2],desc:"녹색 형광을 내는 희토류입니다.",uses:"형광등, 자기광학장치",disc:"1843년 칼 모산더"},
+  {sym:"Dy",name:"디스프로슘",num:66,mass:162.50,period:6,group:3,cat:"metal",e:[2,8,18,28,8,2],desc:"레이저와 자석에 사용됩니다.",uses:"레이저, 원자로 제어봉",disc:"1886년 폴 보아보드랑"},
+  {sym:"Ho",name:"홀뮴",num:67,mass:164.93,period:6,group:3,cat:"metal",e:[2,8,18,29,8,2],desc:"가장 강한 자기적 성질을 가진 원소입니다.",uses:"레이저, 자석",disc:"1878년 마르크 들라폰텐"},
+  {sym:"Er",name:"어븀",num:68,mass:167.26,period:6,group:3,cat:"metal",e:[2,8,18,30,8,2],desc:"광섬유 증폭기에 사용됩니다.",uses:"광섬유, 레이저",disc:"1843년 칼 모산더"},
+  {sym:"Tm",name:"툴륨",num:69,mass:168.93,period:6,group:3,cat:"metal",e:[2,8,18,31,8,2],desc:"가장 희귀한 란타넘족 원소입니다.",uses:"휴대용 X선기기, 레이저",disc:"1879년 페르 클레베"},
+  {sym:"Yb",name:"이터븀",num:70,mass:173.05,period:6,group:3,cat:"metal",e:[2,8,18,32,8,2],desc:"원자시계에 사용되는 희토류입니다.",uses:"원자시계, 스테인리스강",disc:"1878년 장 드 마리냐크"},
+  {sym:"Lu",name:"루테튬",num:71,mass:174.97,period:6,group:3,cat:"metal",e:[2,8,18,32,9,2],desc:"란타넘족의 마지막 원소입니다.",uses:"석유 정제 촉매",disc:"1907년 조르주 위르벵"},
+  {sym:"Hf",name:"하프늄",num:72,mass:178.49,period:6,group:4,cat:"metal",e:[2,8,18,32,10,2],desc:"핵반응로 제어봉에 사용됩니다.",uses:"핵반응로 제어봉, 합금",disc:"1923년 디르크 코스터"},
+  {sym:"Ta",name:"탄탈럼",num:73,mass:180.95,period:6,group:5,cat:"metal",e:[2,8,18,32,11,2],desc:"내식성과 생체 적합성이 뛰어납니다.",uses:"콘덴서, 임플란트",disc:"1802년 안데르스 에케베리"},
+  {sym:"W",name:"텅스텐",num:74,mass:183.84,period:6,group:6,cat:"metal",e:[2,8,18,32,12,2],desc:"녹는점이 가장 높은 금속입니다.",uses:"전구 필라멘트, 공구",disc:"1783년 후안 엘루야르"},
+  {sym:"Re",name:"레늄",num:75,mass:186.21,period:6,group:7,cat:"metal",e:[2,8,18,32,13,2],desc:"매우 희귀한 고융점 금속입니다.",uses:"제트엔진, 촉매",disc:"1925년 발터 노다크"},
+  {sym:"Os",name:"오스뮴",num:76,mass:190.23,period:6,group:8,cat:"metal",e:[2,8,18,32,14,2],desc:"밀도가 가장 높은 원소입니다.",uses:"펜촉, 전기접점",disc:"1803년 스미슨 테넌트"},
+  {sym:"Ir",name:"이리듐",num:77,mass:192.22,period:6,group:9,cat:"metal",e:[2,8,18,32,15,2],desc:"부식에 매우 강한 백금족 금속입니다.",uses:"스파크 플러그, 도가니",disc:"1803년 스미슨 테넌트"},
+  {sym:"Pt",name:"백금",num:78,mass:195.08,period:6,group:10,cat:"metal",e:[2,8,18,32,17,1],desc:"귀금속이며 촉매로 널리 사용됩니다.",uses:"장신구, 촉매, 전극",disc:"1735년 안토니오 데 울료아"},
+  {sym:"Au",name:"금",num:79,mass:196.97,period:6,group:11,cat:"metal",e:[2,8,18,32,18,1],desc:"가장 전성과 연성이 좋은 귀금속입니다.",uses:"장신구, 전자부품, 화폐",disc:"고대부터 알려짐"},
+  {sym:"Hg",name:"수은",num:80,mass:200.59,period:6,group:12,cat:"metal",e:[2,8,18,32,18,2],desc:"상온에서 액체인 유일한 금속입니다.",uses:"온도계, 형광등, 배터리",disc:"고대부터 알려짐"},
+  {sym:"Tl",name:"탈륨",num:81,mass:204.38,period:6,group:13,cat:"metal",e:[2,8,18,32,18,3],desc:"독성이 매우 강한 금속입니다.",uses:"광학렌즈, 방사성 추적자",disc:"1861년 윌리엄 크룩스"},
+  {sym:"Pb",name:"납",num:82,mass:207.2,period:6,group:14,cat:"metal",e:[2,8,18,32,18,4],desc:"부드럽고 무거운 금속입니다.",uses:"배터리, 방사선 차폐",disc:"고대부터 알려짐"},
+  {sym:"Bi",name:"비스무트",num:83,mass:208.98,period:6,group:15,cat:"metal",e:[2,8,18,32,18,5],desc:"반자성이 가장 강한 금속입니다.",uses:"의약품, 화장품, 합금",disc:"1753년 클로드 조프루아"},
+  {sym:"Po",name:"폴로늄",num:84,mass:209.00,period:6,group:16,cat:"metalloid",e:[2,8,18,32,18,6],desc:"강한 방사성을 띠는 준금속입니다.",uses:"원자로, 정전기 제거",disc:"1898년 마리 퀴리"},
+  {sym:"At",name:"아스타틴",num:85,mass:210.00,period:6,group:17,cat:"nonmetal",e:[2,8,18,32,18,7],desc:"매우 불안정한 방사성 원소입니다.",uses:"암 치료 연구",disc:"1940년 데일 코슨"},
+  {sym:"Rn",name:"라돈",num:86,mass:222.00,period:6,group:18,cat:"nonmetal",e:[2,8,18,32,18,8],desc:"방사성 불활성 기체입니다.",uses:"지진 예측, 암 치료",disc:"1900년 프리드리히 도른"},
+  {sym:"Fr",name:"프랑슘",num:87,mass:223.00,period:7,group:1,cat:"metal",e:[2,8,18,32,18,8,1],desc:"극히 불안정한 방사성 알칼리 금속입니다.",uses:"과학 연구",disc:"1939년 마르그리트 페레"},
+  {sym:"Ra",name:"라듐",num:88,mass:226.00,period:7,group:2,cat:"metal",e:[2,8,18,32,18,8,2],desc:"강한 방사능을 내는 알칼리 토금속입니다.",uses:"암 치료(역사적)",disc:"1898년 마리 퀴리"},
+  {sym:"Ac",name:"악티늄",num:89,mass:227.00,period:7,group:3,cat:"metal",e:[2,8,18,32,18,9,2],desc:"악티늄족의 첫 번째 원소입니다.",uses:"중성자원, 암 치료",disc:"1899년 앙드레 드비에른"},
+  {sym:"Th",name:"토륨",num:90,mass:232.04,period:7,group:3,cat:"metal",e:[2,8,18,32,18,10,2],desc:"핵연료로 사용될 수 있는 방사성 원소입니다.",uses:"핵연료, 용접봉",disc:"1829년 옌스 베르셀리우스"},
+  {sym:"Pa",name:"프로탁티늄",num:91,mass:231.04,period:7,group:3,cat:"metal",e:[2,8,18,32,20,9,2],desc:"매우 희귀한 방사성 원소입니다.",uses:"과학 연구",disc:"1913년 카지미에시 파얀스"},
+  {sym:"U",name:"우라늄",num:92,mass:238.03,period:7,group:3,cat:"metal",e:[2,8,18,32,21,9,2],desc:"핵분열과 핵무기에 사용되는 원소입니다.",uses:"핵연료, 핵무기",disc:"1789년 마르틴 클라프로트"},
+  {sym:"Np",name:"넵투늄",num:93,mass:237.00,period:7,group:3,cat:"metal",e:[2,8,18,32,22,9,2],desc:"최초의 초우라늄 원소입니다.",uses:"중성자 탐지기",disc:"1940년 에드윈 맥밀런"},
+  {sym:"Pu",name:"플루토늄",num:94,mass:244.00,period:7,group:3,cat:"metal",e:[2,8,18,32,24,8,2],desc:"핵무기와 원자로에 사용됩니다.",uses:"핵무기, 원자로 연료",disc:"1940년 글렌 시보그"},
+  {sym:"Am",name:"아메리슘",num:95,mass:243.00,period:7,group:3,cat:"metal",e:[2,8,18,32,25,8,2],desc:"연기 감지기에 사용됩니다.",uses:"연기 감지기",disc:"1944년 글렌 시보그"},
+  {sym:"Cm",name:"퀴륨",num:96,mass:247.00,period:7,group:3,cat:"metal",e:[2,8,18,32,25,9,2],desc:"마리 퀴리의 이름을 딴 원소입니다.",uses:"우주 탐사선 전원",disc:"1944년 글렌 시보그"},
+  {sym:"Bk",name:"버클륨",num:97,mass:247.00,period:7,group:3,cat:"metal",e:[2,8,18,32,27,8,2],desc:"버클리에서 발견된 합성 원소입니다.",uses:"과학 연구",disc:"1949년 글렌 시보그"},
+  {sym:"Cf",name:"캘리포늄",num:98,mass:251.00,period:7,group:3,cat:"metal",e:[2,8,18,32,28,8,2],desc:"중성자원으로 사용됩니다.",uses:"암 치료, 중성자원",disc:"1950년 글렌 시보그"},
+  {sym:"Es",name:"아인슈타이늄",num:99,mass:252.00,period:7,group:3,cat:"metal",e:[2,8,18,32,29,8,2],desc:"수소폭탄 실험에서 발견되었습니다.",uses:"과학 연구",disc:"1952년 알버트 기오르소"},
+  {sym:"Fm",name:"페르뮴",num:100,mass:257.00,period:7,group:3,cat:"metal",e:[2,8,18,32,30,8,2],desc:"엔리코 페르미의 이름을 딴 원소입니다.",uses:"과학 연구",disc:"1952년 알버트 기오르소"},
+  {sym:"Md",name:"멘델레븀",num:101,mass:258.00,period:7,group:3,cat:"metal",e:[2,8,18,32,31,8,2],desc:"멘델레예프의 이름을 딴 원소입니다.",uses:"과학 연구",disc:"1955년 알버트 기오르소"},
+  {sym:"No",name:"노벨륨",num:102,mass:259.00,period:7,group:3,cat:"metal",e:[2,8,18,32,32,8,2],desc:"알프레드 노벨의 이름을 딴 원소입니다.",uses:"과학 연구",disc:"1958년 알버트 기오르소"},
+  {sym:"Lr",name:"로렌슘",num:103,mass:262.00,period:7,group:3,cat:"metal",e:[2,8,18,32,32,9,2],desc:"악티늄족의 마지막 원소입니다.",uses:"과학 연구",disc:"1961년 알버트 기오르소"},
+];
+
+const CAT_COLORS = {metal:"#85B7EB", metalloid:"#C0DD97", nonmetal:"#FAC775"};
+const CAT_NAMES  = {metal:"금속", metalloid:"준금속", nonmetal:"비금속"};
+const SHELLS     = ['K','L','M','N','O','P','Q'];
+
+let activeFilter = 'all';
+
+function makeCellSize() {
+  const w = document.querySelector('.pt-wrap').offsetWidth || 360;
+  const avail = w - 24 - 40; // padding + period-label column
+  return Math.max(30, Math.min(52, Math.floor(avail / 18)));
+}
+
+function getColor(el) { return CAT_COLORS[el.cat] || '#ccc'; }
+
+function renderCell(el, size) {
+  const d = document.createElement('div');
+  if (!el) { d.className = 'empty'; d.style.cssText = `width:${size}px;height:${size}px`; return d; }
+  d.className = 'el-cell';
+  d.style.cssText = `width:${size}px;height:${size}px;background:${getColor(el)}`;
+  const fs1 = Math.max(7,  Math.floor(size * 0.17));
+  const fs2 = Math.max(9,  Math.floor(size * 0.26));
+  const fs3 = Math.max(6,  Math.floor(size * 0.14));
+  d.innerHTML =
+    `<span class="el-num"  style="font-size:${fs1}px">${el.num}</span>` +
+    `<span class="el-sym"  style="font-size:${fs2}px">${el.sym}</span>` +
+    `<span class="el-name" style="font-size:${fs3}px;padding:0 1px">${el.name}</span>`;
+  if (activeFilter !== 'all' && el.cat !== activeFilter) d.classList.add('dimmed');
+  d.addEventListener('click', () => showDetail(el));
+  return d;
+}
+
+function renderGrid() {
+  const size = makeCellSize();
+  const grid = document.getElementById('pt-grid');
+  grid.style.gridTemplateColumns = `40px repeat(18,${size}px)`;
+  grid.innerHTML = '';
+
+  // group header row
+  grid.appendChild(Object.assign(document.createElement('div'), {className:'group-label'}));
+  for (let g = 1; g <= 18; g++) {
+    const lbl = document.createElement('div');
+    lbl.className = 'group-label';
+    lbl.style.cssText = `width:${size}px;font-size:9px`;
+    lbl.textContent = g;
+    grid.appendChild(lbl);
+  }
+
+  for (let p = 1; p <= 7; p++) {
+    // period label
+    const pl = document.createElement('div');
+    pl.className = 'period-label';
+    pl.style.cssText = `width:40px;height:${size}px`;
+    pl.textContent = p;
+    grid.appendChild(pl);
+
+    for (let g = 1; g <= 18; g++) {
+      // lanthanide / actinide placeholder
+      if ((p === 6 || p === 7) && g === 3) {
+        const ph = document.createElement('div');
+        ph.className = 'placeholder';
+        ph.style.cssText = `width:${size}px;height:${size}px;font-size:${Math.max(7, size*0.15)}px`;
+        ph.textContent = p === 6 ? '57-71' : '89-103';
+        grid.appendChild(ph);
+        continue;
+      }
+      const el = ELEMENTS.find(e =>
+        e.period === p && e.group === g &&
+        !(e.num >= 57 && e.num <= 71) &&
+        !(e.num >= 89 && e.num <= 103)
+      );
+      grid.appendChild(renderCell(el || null, size));
+    }
+  }
+
+  // series rows
+  ['lant-row','act-row'].forEach((rowId, idx) => {
+    const row = document.getElementById(rowId);
+    row.innerHTML = '';
+    const start = idx === 0 ? 57 : 89;
+    for (let n = start; n < start + 15; n++) {
+      const el = ELEMENTS.find(e => e.num === n);
+      if (el) row.appendChild(renderCell(el, size));
+    }
+  });
+}
+
+function showDetail(el) {
+  document.getElementById('d-sym').textContent  = el.sym;
+  document.getElementById('d-name').textContent = el.num + '. ' + el.name;
+  document.getElementById('d-sub').textContent  = CAT_NAMES[el.cat] || el.cat;
+  document.getElementById('d-num').textContent  = el.num;
+  document.getElementById('d-mass').textContent = el.mass;
+  document.getElementById('d-pg').textContent   = el.period + '주기 / ' + el.group + '족';
+  document.getElementById('d-cat').textContent  = CAT_NAMES[el.cat] || el.cat;
+  document.getElementById('d-desc').textContent = el.desc;
+  document.getElementById('d-uses').textContent = el.uses;
+  document.getElementById('d-disc').textContent = el.disc;
+  document.getElementById('detail-header').style.background = getColor(el);
+
+  const chips = document.getElementById('e-chips');
+  chips.innerHTML = '';
+  el.e.forEach((cnt, i) => {
+    const c = document.createElement('div');
+    c.className = 'e-chip';
+    c.textContent = SHELLS[i] + '껍질: ' + cnt + 'e⁻';
+    chips.appendChild(c);
+  });
+  document.getElementById('e-total').textContent =
+    '총 전자 수: ' + el.e.reduce((a,b) => a+b, 0) + '개';
+
+  drawAtom(el);
+  document.getElementById('detail-panel').style.display = 'flex';
+}
+
+function drawAtom(el) {
+  const canvas = document.getElementById('atom-canvas');
+  const ctx    = canvas.getContext('2d');
+  const W = 220, H = 220, cx = W/2, cy = H/2;
+  ctx.clearRect(0, 0, W, H);
+
+  const shells  = el.e.length;
+  const maxR    = Math.min(cx, cy) - 14;
+  const step    = shells > 0 ? maxR / (shells + 0.5) : 30;
+  const nucR    = Math.min(18, step * 0.5);
+
+  // nucleus
+  ctx.beginPath();
+  ctx.arc(cx, cy, nucR, 0, Math.PI*2);
+  ctx.fillStyle = '#E24B4A';
+  ctx.fill();
+
+  const total = el.e.reduce((a,b) => a+b, 0);
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${Math.min(13, nucR*0.85)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(total+'+', cx, cy);
+
+  // shells
+  el.e.forEach((cnt, si) => {
+    const r  = step * (si + 1);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.strokeStyle = '#378ADD';
+    ctx.lineWidth   = 1;
+    ctx.stroke();
+
+    const eR = Math.min(5, step * 0.18);
+    for (let i = 0; i < cnt; i++) {
+      const angle = (2*Math.PI*i)/cnt - Math.PI/2;
+      const ex = cx + r * Math.cos(angle);
+      const ey = cy + r * Math.sin(angle);
+      ctx.beginPath();
+      ctx.arc(ex, ey, eR, 0, Math.PI*2);
+      ctx.fillStyle = '#185FA5';
+      ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${Math.max(6, eR*1.4)}px sans-serif`;
+      ctx.fillText('−', ex, ey + 0.5);
+    }
+  });
+}
+
+// Close handlers
+document.getElementById('close-btn').addEventListener('click', () => {
+  document.getElementById('detail-panel').style.display = 'none';
+});
+document.getElementById('detail-panel').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activeFilter = this.dataset.cat;
+    renderGrid();
+  });
+});
+
+// Initial render + resize
+renderGrid();
+window.addEventListener('resize', () => {
+  clearTimeout(window._resizeTimer);
+  window._resizeTimer = setTimeout(renderGrid, 100);
+});
+</script>
+</body>
+</html>
