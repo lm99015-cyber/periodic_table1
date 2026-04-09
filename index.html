@@ -61,7 +61,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 <div class="pt-wrap">
-  <div class="pt-title">주기율표 (원자번호 1–103)</div>
+  <div class="pt-title">주기율표 (원자번호 1–118)</div>
   <div class="controls">
     <button class="filter-btn active" data-cat="all" style="background:#f0f0f0">전체</button>
     <button class="filter-btn" data-cat="metal" style="background:#85B7EB"><span class="dot" style="background:#378ADD"></span>금속</button>
@@ -76,7 +76,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="series-row" id="lant-row"></div>
   </div>
   <div class="series-section">
-    <div class="series-title">악티늄족 (89–103)</div>
+    <div class="series-title">악티늄족 (89–118)</div>
     <div class="series-row" id="act-row"></div>
   </div>
   <div class="hint">원소를 클릭하면 상세 정보를 볼 수 있습니다</div>
@@ -221,6 +221,21 @@ const ELEMENTS = [
   {sym:"Md",name:"멘델레븀",num:101,mass:258.00,period:7,group:3,cat:"metal",e:[2,8,18,32,31,8,2],desc:"멘델레예프의 이름을 딴 원소입니다.",uses:"과학 연구",disc:"1955년 알버트 기오르소"},
   {sym:"No",name:"노벨륨",num:102,mass:259.00,period:7,group:3,cat:"metal",e:[2,8,18,32,32,8,2],desc:"알프레드 노벨의 이름을 딴 원소입니다.",uses:"과학 연구",disc:"1958년 알버트 기오르소"},
   {sym:"Lr",name:"로렌슘",num:103,mass:262.00,period:7,group:3,cat:"metal",e:[2,8,18,32,32,9,2],desc:"악티늄족의 마지막 원소입니다.",uses:"과학 연구",disc:"1961년 알버트 기오르소"},
+  {sym:"Rf",name:"러더포듐",num:104,mass:267.00,period:7,group:4,cat:"metal",e:[2,8,18,32,32,10,2],desc:"최초의 초악티늄 원소로, 러더퍼드의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1964년 두브나 연구소"},
+  {sym:"Db",name:"더브늄",num:105,mass:268.00,period:7,group:5,cat:"metal",e:[2,8,18,32,32,11,2],desc:"러시아 두브나에서 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1967년 두브나 연구소"},
+  {sym:"Sg",name:"시보귬",num:106,mass:271.00,period:7,group:6,cat:"metal",e:[2,8,18,32,32,12,2],desc:"글렌 시보그의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1974년 글렌 시보그"},
+  {sym:"Bh",name:"보륨",num:107,mass:272.00,period:7,group:7,cat:"metal",e:[2,8,18,32,32,13,2],desc:"닐스 보어의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1981년 GSI 연구소"},
+  {sym:"Hs",name:"하슘",num:108,mass:270.00,period:7,group:8,cat:"metal",e:[2,8,18,32,32,14,2],desc:"독일 헤센주의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1984년 GSI 연구소"},
+  {sym:"Mt",name:"마이트너륨",num:109,mass:276.00,period:7,group:9,cat:"metal",e:[2,8,18,32,32,15,2],desc:"리제 마이트너의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1982년 GSI 연구소"},
+  {sym:"Ds",name:"다름슈타튬",num:110,mass:281.00,period:7,group:10,cat:"metal",e:[2,8,18,32,32,16,2],desc:"독일 다름슈타트에서 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1994년 GSI 연구소"},
+  {sym:"Rg",name:"뢴트게늄",num:111,mass:280.00,period:7,group:11,cat:"metal",e:[2,8,18,32,32,17,2],desc:"빌헬름 뢴트겐의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1994년 GSI 연구소"},
+  {sym:"Cn",name:"코페르니슘",num:112,mass:285.00,period:7,group:12,cat:"metal",e:[2,8,18,32,32,18,2],desc:"코페르니쿠스의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"1996년 GSI 연구소"},
+  {sym:"Nh",name:"니호늄",num:113,mass:286.00,period:7,group:13,cat:"metal",e:[2,8,18,32,32,18,3],desc:"일본(니혼)의 이름을 딴 최초의 아시아 발견 원소입니다.",uses:"과학 연구",disc:"2004년 RIKEN 연구소"},
+  {sym:"Fl",name:"플레로븀",num:114,mass:289.00,period:7,group:14,cat:"metal",e:[2,8,18,32,32,18,4],desc:"러시아 플레로프 핵반응 연구소의 이름을 딴 원소입니다.",uses:"과학 연구",disc:"1998년 두브나 연구소"},
+  {sym:"Mc",name:"모스코븀",num:115,mass:290.00,period:7,group:15,cat:"metal",e:[2,8,18,32,32,18,5],desc:"러시아 모스크바의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"2003년 두브나 연구소"},
+  {sym:"Lv",name:"리버모륨",num:116,mass:293.00,period:7,group:16,cat:"metal",e:[2,8,18,32,32,18,6],desc:"미국 리버모어 국립연구소의 이름을 딴 원소입니다.",uses:"과학 연구",disc:"2000년 두브나 연구소"},
+  {sym:"Ts",name:"테네신",num:117,mass:294.00,period:7,group:17,cat:"nonmetal",e:[2,8,18,32,32,18,7],desc:"미국 테네시주의 이름을 딴 합성 원소입니다.",uses:"과학 연구",disc:"2010년 두브나 연구소"},
+  {sym:"Og",name:"오가네손",num:118,mass:294.00,period:7,group:18,cat:"nonmetal",e:[2,8,18,32,32,18,8],desc:"유리 오가네시안의 이름을 딴 현재까지 발견된 가장 무거운 원소입니다.",uses:"과학 연구",disc:"2002년 두브나 연구소"},
 ];
 
 const CAT_COLORS = {metal:"#85B7EB", metalloid:"#C0DD97", nonmetal:"#FAC775"};
@@ -284,14 +299,14 @@ function renderGrid() {
         const ph = document.createElement('div');
         ph.className = 'placeholder';
         ph.style.cssText = `width:${size}px;height:${size}px;font-size:${Math.max(7, size*0.15)}px`;
-        ph.textContent = p === 6 ? '57-71' : '89-103';
+        ph.textContent = p === 6 ? '57-71' : '89-118';
         grid.appendChild(ph);
         continue;
       }
       const el = ELEMENTS.find(e =>
         e.period === p && e.group === g &&
         !(e.num >= 57 && e.num <= 71) &&
-        !(e.num >= 89 && e.num <= 103)
+        !(e.num >= 89 && e.num <= 118)
       );
       grid.appendChild(renderCell(el || null, size));
     }
@@ -300,25 +315,42 @@ function renderGrid() {
   // series rows — align with main grid
   // Main grid width = 40px (period label) + 18 * (size+2) px (cells+gap)
   // 란타넘족 starts at group 3, so left offset = 40px + 2*(size+2)px
-  const cellStep = size + 2; // cell size + gap
-  const seriesLeftOffset = 40 + 2 * cellStep; // period-label + group1 + group2
-  const seriesWidth = 15 * cellStep - 2; // 15 cells
+  const cellStep = size + 2;
+  const seriesLeftOffset = 40 + 2 * cellStep;
+  const seriesWidth = 15 * cellStep - 2;
 
-  ['lant-row','act-row'].forEach((rowId, idx) => {
-    const section = document.getElementById(rowId).parentElement;
-    section.style.paddingLeft = seriesLeftOffset + 'px';
+  // 란타넘족 (57–71): 15개
+  const lantRow = document.getElementById('lant-row');
+  lantRow.innerHTML = '';
+  lantRow.style.width = seriesWidth + 'px';
+  lantRow.style.justifyContent = 'flex-start';
+  document.getElementById('lant-row').parentElement.style.paddingLeft = seriesLeftOffset + 'px';
+  for (let n = 57; n <= 71; n++) {
+    const el = ELEMENTS.find(e => e.num === n);
+    if (el) lantRow.appendChild(renderCell(el, size));
+  }
 
-    const row = document.getElementById(rowId);
-    row.innerHTML = '';
-    row.style.width = seriesWidth + 'px';
-    row.style.justifyContent = 'flex-start';
+  // 악티늄족 (89–118): 30개 — 2줄로 나눔
+  const actSection = document.getElementById('act-row').parentElement;
+  actSection.style.paddingLeft = seriesLeftOffset + 'px';
+  actSection.innerHTML = '<div class="series-title">악티늄족 (89–118)</div>' +
+    '<div class="series-row" id="act-row1"></div>' +
+    '<div class="series-row" id="act-row2" style="margin-top:2px"></div>';
 
-    const start = idx === 0 ? 57 : 89;
-    for (let n = start; n < start + 15; n++) {
-      const el = ELEMENTS.find(e => e.num === n);
-      if (el) row.appendChild(renderCell(el, size));
-    }
+  const actRow1 = document.getElementById('act-row1');
+  const actRow2 = document.getElementById('act-row2');
+  [actRow1, actRow2].forEach(r => {
+    r.style.width = seriesWidth + 'px';
+    r.style.justifyContent = 'flex-start';
   });
+  for (let n = 89; n <= 103; n++) {
+    const el = ELEMENTS.find(e => e.num === n);
+    if (el) actRow1.appendChild(renderCell(el, size));
+  }
+  for (let n = 104; n <= 118; n++) {
+    const el = ELEMENTS.find(e => e.num === n);
+    if (el) actRow2.appendChild(renderCell(el, size));
+  }
 }
 
 function showDetail(el) {
