@@ -6,8 +6,15 @@
 <title>주기율표</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#222}
-.pt-wrap{padding:12px;max-width:100%}
+html{height:100%;background:#f5f5f5}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#f5f5f5;color:#222;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:12px;
+}
+.pt-wrap{width:fit-content}
 .pt-title{font-size:18px;font-weight:600;color:#222;margin-bottom:12px;text-align:center}
 .controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;justify-content:center}
 .filter-btn{font-size:12px;padding:5px 14px;border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;background:#fff;color:#444;cursor:pointer;transition:all 0.15s;font-weight:500;display:flex;align-items:center;gap:5px}
@@ -238,244 +245,162 @@ const ELEMENTS = [
   {sym:"Og",name:"오가네손",num:118,mass:294.00,period:7,group:18,cat:"nonmetal",e:[2,8,18,32,32,18,8],desc:"유리 오가네시안의 이름을 딴 현재까지 발견된 가장 무거운 원소입니다.",uses:"과학 연구",disc:"2002년 두브나 연구소"},
 ];
 
-const CAT_COLORS = {metal:"#85B7EB", metalloid:"#C0DD97", nonmetal:"#FAC775"};
-const CAT_NAMES  = {metal:"금속", metalloid:"준금속", nonmetal:"비금속"};
-const SHELLS     = ['K','L','M','N','O','P','Q'];
+const CAT_COLORS={metal:"#85B7EB",metalloid:"#C0DD97",nonmetal:"#FAC775"};
+const CAT_NAMES={metal:"금속",metalloid:"준금속",nonmetal:"비금속"};
+const SHELLS=['K','L','M','N','O','P','Q'];
+let activeFilter='all';
 
-let activeFilter = 'all';
-
-function makeCellSize() {
-  const w = document.querySelector('.pt-wrap').offsetWidth || 360;
-  const avail = w - 24 - 40; // padding + period-label column
-  return Math.max(30, Math.min(52, Math.floor(avail / 18)));
+function makeCellSize(){
+  // 뷰포트 너비와 높이 모두 고려해 셀 크기 결정
+  const vw=window.innerWidth;
+  const vh=window.innerHeight;
+  // 너비 기준: padding(24) + period-label(40), 18열
+  const byW=Math.floor((vw-24-40)/18);
+  // 높이 기준: 타이틀+필터+시리즈+힌트 약 120px, 11행(주기7+시리즈3+헤더1)
+  const byH=Math.floor((vh-120-10*2)/11);
+  return Math.max(24,Math.min(52,Math.min(byW,byH)));
 }
 
-function getColor(el) { return CAT_COLORS[el.cat] || '#ccc'; }
+function getColor(el){return CAT_COLORS[el.cat]||'#ccc';}
 
-function renderCell(el, size) {
-  const d = document.createElement('div');
-  if (!el) { d.className = 'empty'; d.style.cssText = `width:${size}px;height:${size}px`; return d; }
-  d.className = 'el-cell';
-  d.style.cssText = `width:${size}px;height:${size}px;background:${getColor(el)}`;
-  const fs1 = Math.max(7,  Math.floor(size * 0.17));
-  const fs2 = Math.max(9,  Math.floor(size * 0.26));
-  const fs3 = Math.max(6,  Math.floor(size * 0.14));
-  d.innerHTML =
-    `<span class="el-num"  style="font-size:${fs1}px">${el.num}</span>` +
-    `<span class="el-sym"  style="font-size:${fs2}px">${el.sym}</span>` +
+function renderCell(el,size){
+  const d=document.createElement('div');
+  if(!el){d.className='empty';d.style.cssText=`width:${size}px;height:${size}px`;return d;}
+  d.className='el-cell';
+  d.style.cssText=`width:${size}px;height:${size}px;background:${getColor(el)}`;
+  const fs1=Math.max(7,Math.floor(size*0.17));
+  const fs2=Math.max(9,Math.floor(size*0.26));
+  const fs3=Math.max(6,Math.floor(size*0.14));
+  d.innerHTML=`<span class="el-num" style="font-size:${fs1}px">${el.num}</span>`+
+    `<span class="el-sym" style="font-size:${fs2}px">${el.sym}</span>`+
     `<span class="el-name" style="font-size:${fs3}px;padding:0 1px">${el.name}</span>`;
-  if (activeFilter !== 'all' && el.cat !== activeFilter) d.classList.add('dimmed');
-  d.addEventListener('click', () => showDetail(el));
+  if(activeFilter!=='all'&&el.cat!==activeFilter)d.classList.add('dimmed');
+  d.addEventListener('click',()=>showDetail(el));
   return d;
 }
 
-function renderGrid() {
-  const size = makeCellSize();
-  const grid = document.getElementById('pt-grid');
-  grid.style.gridTemplateColumns = `40px repeat(18,${size}px)`;
-  grid.innerHTML = '';
-
-  // group header row
-  grid.appendChild(Object.assign(document.createElement('div'), {className:'group-label'}));
-  for (let g = 1; g <= 18; g++) {
-    const lbl = document.createElement('div');
-    lbl.className = 'group-label';
-    lbl.style.cssText = `width:${size}px;font-size:9px`;
-    lbl.textContent = g;
+function renderGrid(){
+  const size=makeCellSize();
+  const grid=document.getElementById('pt-grid');
+  grid.style.gridTemplateColumns=`40px repeat(18,${size}px)`;
+  grid.innerHTML='';
+  grid.appendChild(Object.assign(document.createElement('div'),{className:'group-label'}));
+  for(let g=1;g<=18;g++){
+    const lbl=document.createElement('div');
+    lbl.className='group-label';
+    lbl.style.cssText=`width:${size}px;font-size:9px`;
+    lbl.textContent=g;
     grid.appendChild(lbl);
   }
-
-  for (let p = 1; p <= 7; p++) {
-    // period label
-    const pl = document.createElement('div');
-    pl.className = 'period-label';
-    pl.style.cssText = `width:40px;height:${size}px`;
-    pl.textContent = p;
+  for(let p=1;p<=7;p++){
+    const pl=document.createElement('div');
+    pl.className='period-label';
+    pl.style.cssText=`width:40px;height:${size}px`;
+    pl.textContent=p;
     grid.appendChild(pl);
-
-    for (let g = 1; g <= 18; g++) {
-      // lanthanide / actinide placeholder
-      if ((p === 6 || p === 7) && g === 3) {
-        const ph = document.createElement('div');
-        ph.className = 'placeholder';
-        ph.style.cssText = `width:${size}px;height:${size}px;font-size:${Math.max(7, size*0.15)}px`;
-        ph.textContent = p === 6 ? '57-71' : '89-118';
+    for(let g=1;g<=18;g++){
+      if((p===6||p===7)&&g===3){
+        const ph=document.createElement('div');
+        ph.className='placeholder';
+        ph.style.cssText=`width:${size}px;height:${size}px;font-size:${Math.max(7,size*0.15)}px`;
+        ph.textContent=p===6?'57-71':'89-118';
         grid.appendChild(ph);
         continue;
       }
-      const el = ELEMENTS.find(e =>
-        e.period === p && e.group === g &&
-        !(e.num >= 57 && e.num <= 71) &&
-        !(e.num >= 89 && e.num <= 118)
-      );
-      grid.appendChild(renderCell(el || null, size));
+      const el=ELEMENTS.find(e=>e.period===p&&e.group===g&&!(e.num>=57&&e.num<=71)&&!(e.num>=89&&e.num<=118));
+      grid.appendChild(renderCell(el||null,size));
     }
   }
-
-  // series rows — align with main grid
-  // Main grid width = 40px (period label) + 18 * (size+2) px (cells+gap)
-  // 란타넘족 starts at group 3, so left offset = 40px + 2*(size+2)px
-  const cellStep = size + 2;
-  const seriesLeftOffset = 40 + 2 * cellStep;
-  const seriesWidth = 15 * cellStep - 2;
-
-  // 란타넘족 (57–71): 15개
-  const lantRow = document.getElementById('lant-row');
-  lantRow.innerHTML = '';
-  lantRow.style.width = seriesWidth + 'px';
-  lantRow.style.justifyContent = 'flex-start';
-  document.getElementById('lant-row').parentElement.style.paddingLeft = seriesLeftOffset + 'px';
-  for (let n = 57; n <= 71; n++) {
-    const el = ELEMENTS.find(e => e.num === n);
-    if (el) lantRow.appendChild(renderCell(el, size));
-  }
-
-  // 악티늄족 (89–118): 30개 — 2줄로 나눔
-  const actSection = document.getElementById('act-row').parentElement;
-  actSection.style.paddingLeft = seriesLeftOffset + 'px';
-  actSection.innerHTML = '<div class="series-title">악티늄족 (89–118)</div>' +
-    '<div class="series-row" id="act-row1"></div>' +
+  const cellStep=size+2;
+  const seriesLeftOffset=40+2*cellStep;
+  const seriesWidth=15*cellStep-2;
+  const lantRow=document.getElementById('lant-row');
+  lantRow.innerHTML='';
+  lantRow.style.width=seriesWidth+'px';
+  lantRow.parentElement.style.paddingLeft=seriesLeftOffset+'px';
+  for(let n=57;n<=71;n++){const el=ELEMENTS.find(e=>e.num===n);if(el)lantRow.appendChild(renderCell(el,size));}
+  const actSection=document.getElementById('act-row').parentElement;
+  actSection.style.paddingLeft=seriesLeftOffset+'px';
+  actSection.innerHTML='<div class="series-title">악티늄족 (89–118)</div>'+
+    '<div class="series-row" id="act-row1"></div>'+
     '<div class="series-row" id="act-row2" style="margin-top:2px"></div>';
-
-  const actRow1 = document.getElementById('act-row1');
-  const actRow2 = document.getElementById('act-row2');
-  [actRow1, actRow2].forEach(r => {
-    r.style.width = seriesWidth + 'px';
-    r.style.justifyContent = 'flex-start';
-  });
-  for (let n = 89; n <= 103; n++) {
-    const el = ELEMENTS.find(e => e.num === n);
-    if (el) actRow1.appendChild(renderCell(el, size));
-  }
-  for (let n = 104; n <= 118; n++) {
-    const el = ELEMENTS.find(e => e.num === n);
-    if (el) actRow2.appendChild(renderCell(el, size));
-  }
+  const actRow1=document.getElementById('act-row1');
+  const actRow2=document.getElementById('act-row2');
+  [actRow1,actRow2].forEach(r=>{r.style.width=seriesWidth+'px';r.style.justifyContent='flex-start';});
+  for(let n=89;n<=103;n++){const el=ELEMENTS.find(e=>e.num===n);if(el)actRow1.appendChild(renderCell(el,size));}
+  for(let n=104;n<=118;n++){const el=ELEMENTS.find(e=>e.num===n);if(el)actRow2.appendChild(renderCell(el,size));}
 }
 
-function showDetail(el) {
-  document.getElementById('d-sym').textContent  = el.sym;
-  document.getElementById('d-name').textContent = el.num + '. ' + el.name;
-  document.getElementById('d-sub').textContent  = CAT_NAMES[el.cat] || el.cat;
-  document.getElementById('d-num').textContent  = el.num;
-  document.getElementById('d-mass').textContent = el.mass;
-  document.getElementById('d-pg').textContent   = el.period + '주기 / ' + el.group + '족';
-  document.getElementById('d-cat').textContent  = CAT_NAMES[el.cat] || el.cat;
-  document.getElementById('d-desc').textContent = el.desc;
-  document.getElementById('d-uses').textContent = el.uses;
-  document.getElementById('d-disc').textContent = el.disc;
-  document.getElementById('detail-header').style.background = getColor(el);
-
-  const chips = document.getElementById('e-chips');
-  chips.innerHTML = '';
-  el.e.forEach((cnt, i) => {
-    const c = document.createElement('div');
-    c.className = 'e-chip';
-    c.textContent = SHELLS[i] + '껍질: ' + cnt + 'e⁻';
-    chips.appendChild(c);
-  });
-  document.getElementById('e-total').textContent =
-    '총 전자 수: ' + el.e.reduce((a,b) => a+b, 0) + '개';
-
-  document.getElementById('detail-panel').style.display = 'flex';
-  window._currentEl = el;
-  requestAnimationFrame(() => drawAtom(el));
+function showDetail(el){
+  document.getElementById('d-sym').textContent=el.sym;
+  document.getElementById('d-name').textContent=el.num+'. '+el.name;
+  document.getElementById('d-sub').textContent=CAT_NAMES[el.cat]||el.cat;
+  document.getElementById('d-num').textContent=el.num;
+  document.getElementById('d-mass').textContent=el.mass;
+  document.getElementById('d-pg').textContent=el.period+'주기 / '+el.group+'족';
+  document.getElementById('d-cat').textContent=CAT_NAMES[el.cat]||el.cat;
+  document.getElementById('d-desc').textContent=el.desc;
+  document.getElementById('d-uses').textContent=el.uses;
+  document.getElementById('d-disc').textContent=el.disc;
+  document.getElementById('detail-header').style.background=getColor(el);
+  const chips=document.getElementById('e-chips');
+  chips.innerHTML='';
+  el.e.forEach((cnt,i)=>{const c=document.createElement('div');c.className='e-chip';c.textContent=SHELLS[i]+'껍질: '+cnt+'e⁻';chips.appendChild(c);});
+  document.getElementById('e-total').textContent='총 전자 수: '+el.e.reduce((a,b)=>a+b,0)+'개';
+  document.getElementById('detail-panel').style.display='flex';
+  window._currentEl=el;
+  requestAnimationFrame(()=>drawAtom(el));
 }
 
-function drawAtom(el) {
-  const canvas   = document.getElementById('atom-canvas');
-  const ctx      = canvas.getContext('2d');
-  const section  = document.querySelector('.atom-section');
-  const eInfo    = document.querySelector('.electron-info');
-  const atomTitle= document.querySelector('.atom-title');
-  if (!section) return;
-
-  // atom-section의 높이에서 전자 정보 박스·타이틀 높이를 빼서 캔버스 가용 크기 계산
-  const secH    = section.offsetHeight;
-  const secW    = section.offsetWidth;
-  const eInfoH  = eInfo   ? eInfo.offsetHeight   : 60;
-  const titleH  = atomTitle ? atomTitle.offsetHeight : 20;
-  const gap     = 16; // gap 합산 여유
-  const avail   = Math.min(secW - 20, secH - eInfoH - titleH - gap);
-  const size    = Math.max(80, Math.min(200, avail));
-
-  canvas.width  = size;
-  canvas.height = size;
-  canvas.style.width  = size + 'px';
-  canvas.style.height = size + 'px';
-
-  const W = size, H = size, cx = W/2, cy = H/2;
-  ctx.clearRect(0, 0, W, H);
-
-  const shells = el.e.length;
-  const maxR   = Math.min(cx, cy) - 8;
-  const step   = shells > 0 ? maxR / (shells + 0.5) : 20;
-  const nucR   = Math.min(14, step * 0.5);
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, nucR, 0, Math.PI*2);
-  ctx.fillStyle = '#E24B4A';
-  ctx.fill();
-
-  const total = el.e.reduce((a,b) => a+b, 0);
-  ctx.fillStyle = 'white';
-  ctx.font = `bold ${Math.min(11, nucR*0.85)}px sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(total+'+', cx, cy);
-
-  el.e.forEach((cnt, si) => {
-    const r = step * (si + 1);
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI*2);
-    ctx.strokeStyle = '#378ADD';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    const eR = Math.min(4, step * 0.18);
-    for (let i = 0; i < cnt; i++) {
-      const angle = (2*Math.PI*i)/cnt - Math.PI/2;
-      const ex = cx + r * Math.cos(angle);
-      const ey = cy + r * Math.sin(angle);
-      ctx.beginPath();
-      ctx.arc(ex, ey, eR, 0, Math.PI*2);
-      ctx.fillStyle = '#185FA5';
-      ctx.fill();
-      ctx.fillStyle = 'white';
-      ctx.font = `bold ${Math.max(5, eR*1.4)}px sans-serif`;
-      ctx.fillText('−', ex, ey + 0.5);
+function drawAtom(el){
+  const canvas=document.getElementById('atom-canvas');
+  const ctx=canvas.getContext('2d');
+  const section=document.querySelector('.atom-section');
+  const eInfo=document.querySelector('.electron-info');
+  const atomTitle=document.querySelector('.atom-title');
+  if(!section)return;
+  const secH=section.offsetHeight,secW=section.offsetWidth;
+  const eInfoH=eInfo?eInfo.offsetHeight:60;
+  const titleH=atomTitle?atomTitle.offsetHeight:20;
+  const avail=Math.min(secW-20,secH-eInfoH-titleH-16);
+  const size=Math.max(80,Math.min(200,avail));
+  canvas.width=size;canvas.height=size;
+  canvas.style.width=size+'px';canvas.style.height=size+'px';
+  const cx=size/2,cy=size/2;
+  ctx.clearRect(0,0,size,size);
+  const maxR=Math.min(cx,cy)-8;
+  const step=el.e.length>0?maxR/(el.e.length+0.5):20;
+  const nucR=Math.min(14,step*0.5);
+  ctx.beginPath();ctx.arc(cx,cy,nucR,0,Math.PI*2);ctx.fillStyle='#E24B4A';ctx.fill();
+  const total=el.e.reduce((a,b)=>a+b,0);
+  ctx.fillStyle='white';ctx.font=`bold ${Math.min(11,nucR*0.85)}px sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(total+'+',cx,cy);
+  el.e.forEach((cnt,si)=>{
+    const r=step*(si+1);
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='#378ADD';ctx.lineWidth=1;ctx.stroke();
+    const eR=Math.min(4,step*0.18);
+    for(let i=0;i<cnt;i++){
+      const angle=(2*Math.PI*i)/cnt-Math.PI/2;
+      const ex=cx+r*Math.cos(angle),ey=cy+r*Math.sin(angle);
+      ctx.beginPath();ctx.arc(ex,ey,eR,0,Math.PI*2);ctx.fillStyle='#185FA5';ctx.fill();
+      ctx.fillStyle='white';ctx.font=`bold ${Math.max(5,eR*1.4)}px sans-serif`;ctx.fillText('−',ex,ey+0.5);
     }
   });
 }
 
-// Close handlers
-document.getElementById('close-btn').addEventListener('click', () => {
-  document.getElementById('detail-panel').style.display = 'none';
-});
-document.getElementById('detail-panel').addEventListener('click', function(e) {
-  if (e.target === this) this.style.display = 'none';
-});
-
-// Filter buttons
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    activeFilter = this.dataset.cat;
-    renderGrid();
+document.getElementById('close-btn').addEventListener('click',()=>{document.getElementById('detail-panel').style.display='none';});
+document.getElementById('detail-panel').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');activeFilter=this.dataset.cat;renderGrid();
   });
 });
 
-// Initial render + resize
 renderGrid();
-window.addEventListener('resize', () => {
-  clearTimeout(window._resizeTimer);
-  window._resizeTimer = setTimeout(() => {
-    renderGrid();
-    if (document.getElementById('detail-panel').style.display !== 'none' && window._currentEl) {
-      drawAtom(window._currentEl);
-    }
-  }, 100);
+window.addEventListener('resize',()=>{
+  clearTimeout(window._rt);
+  window._rt=setTimeout(()=>{renderGrid();if(document.getElementById('detail-panel').style.display!=='none'&&window._currentEl)drawAtom(window._currentEl);},100);
 });
 </script>
 </body>
