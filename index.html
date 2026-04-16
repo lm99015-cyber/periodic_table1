@@ -11,16 +11,16 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   background:#f5f5f5;color:#222;
   min-height:100vh;
-  display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:flex-start;justify-content:center;
   padding:12px;
 }
-.pt-wrap{width:fit-content}
-.pt-title{font-size:18px;font-weight:600;color:#222;margin-bottom:12px;text-align:center}
-.controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;justify-content:center}
-.filter-btn{font-size:12px;padding:5px 14px;border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;background:#fff;color:#444;cursor:pointer;transition:all 0.15s;font-weight:500;display:flex;align-items:center;gap:5px}
+.pt-wrap{width:fit-content;margin:0 auto}
+.pt-title{font-weight:600;color:#222;text-align:center}
+.controls{display:flex;flex-wrap:wrap;align-items:center;justify-content:center}
+.filter-btn{border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;background:#fff;color:#444;cursor:pointer;transition:all 0.15s;font-weight:500;display:flex;align-items:center}
 .filter-btn:hover{border-color:rgba(0,0,0,0.3);filter:brightness(0.95)}
 .filter-btn.active{border-color:rgba(0,0,0,0.35);filter:brightness(0.88);font-weight:600;color:#222}
-.filter-btn .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,0.15)}
+.filter-btn .dot{border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,0.15)}
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .pt-grid{display:inline-grid;gap:2px}
 .period-label{display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;font-weight:500}
@@ -33,9 +33,11 @@ body{
 .el-name{line-height:1;color:rgba(0,0,0,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
 .placeholder{border-radius:4px;border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;color:#aaa;cursor:default}
 .empty{background:transparent;border:none}
-.series-section{margin-top:14px;overflow-x:auto}
-.series-title{font-size:12px;color:#666;margin-bottom:4px;font-weight:500;padding-left:2px}
-.series-row{display:flex;gap:2px;padding-bottom:4px;flex-shrink:0}
+
+/* 시리즈 섹션 - pt-grid와 정렬 맞추기 위해 JS로 width/margin 제어 */
+.series-section{margin-top:14px}
+.series-title{font-size:12px;color:#666;margin-bottom:4px;font-weight:500}
+.series-row{display:flex;gap:2px;flex-wrap:nowrap}
 
 /* Detail panel */
 .detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:clamp(8px,2vh,20px)}
@@ -67,7 +69,7 @@ body{
 </style>
 </head>
 <body>
-<div class="pt-wrap">
+<div class="pt-wrap" id="pt-wrap">
   <div class="pt-title">주기율표 (원자번호 1–118)</div>
   <div class="controls">
     <button class="filter-btn active" data-cat="all" style="background:#f0f0f0">전체</button>
@@ -78,14 +80,18 @@ body{
   <div class="table-scroll">
     <div id="pt-grid" class="pt-grid"></div>
   </div>
-  <div class="series-section">
+
+  <!-- 시리즈 섹션: JS가 margin-left와 width를 직접 설정 -->
+  <div class="series-section" id="series-lant">
     <div class="series-title">란타넘족 (57–71)</div>
     <div class="series-row" id="lant-row"></div>
   </div>
-  <div class="series-section">
+  <div class="series-section" id="series-act">
     <div class="series-title">악티늄족 (89–118)</div>
-    <div class="series-row" id="act-row"></div>
+    <div class="series-row" id="act-row1"></div>
+    <div class="series-row" id="act-row2" style="margin-top:2px"></div>
   </div>
+
   <div class="hint">원소를 클릭하면 상세 정보를 볼 수 있습니다</div>
 </div>
 
@@ -250,157 +256,258 @@ const CAT_NAMES={metal:"금속",metalloid:"준금속",nonmetal:"비금속"};
 const SHELLS=['K','L','M','N','O','P','Q'];
 let activeFilter='all';
 
+// 주기율표 전체 열 수: period-label(1) + 18열 = 19
+// 셀 간격: 2px gap
+// period-label 너비: 40px
+const PERIOD_LBL_W = 40;
+const GAP = 2;
+const NUM_GROUPS = 18;
+
 function makeCellSize(){
-  // 뷰포트 너비와 높이 모두 고려해 셀 크기 결정
-  const vw=window.innerWidth;
-  const vh=window.innerHeight;
-  // 너비 기준: padding(24) + period-label(40), 18열
-  const byW=Math.floor((vw-24-40)/18);
-  // 높이 기준: 타이틀+필터+시리즈+힌트 약 120px, 11행(주기7+시리즈3+헤더1)
-  const byH=Math.floor((vh-120-10*2)/11);
-  return Math.max(24,Math.min(52,Math.min(byW,byH)));
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  // 좌우 body padding: 24px, period-label: 40px, gap 18개: 36px
+  const byW = Math.floor((vw - 24 - PERIOD_LBL_W - GAP * NUM_GROUPS) / NUM_GROUPS);
+  // 상단 고정 요소 높이: title(30) + controls(44) + series(약 130) + hint(24) + padding(24)
+  const reservedH = 30 + 44 + 130 + 24 + 24;
+  // 주기 행: 1(헤더) + 7(주기) = 8행, gap 7개
+  const byH = Math.floor((vh - reservedH - GAP * 7) / 8);
+  return Math.max(24, Math.min(52, Math.min(byW, byH)));
 }
 
 function getColor(el){return CAT_COLORS[el.cat]||'#ccc';}
 
-function renderCell(el,size){
-  const d=document.createElement('div');
-  if(!el){d.className='empty';d.style.cssText=`width:${size}px;height:${size}px`;return d;}
+function renderCell(el, size){
+  const d = document.createElement('div');
+  if(!el){
+    d.className='empty';
+    d.style.cssText=`width:${size}px;height:${size}px`;
+    return d;
+  }
   d.className='el-cell';
   d.style.cssText=`width:${size}px;height:${size}px;background:${getColor(el)}`;
-  const fs1=Math.max(7,Math.floor(size*0.17));
-  const fs2=Math.max(9,Math.floor(size*0.26));
-  const fs3=Math.max(6,Math.floor(size*0.14));
-  d.innerHTML=`<span class="el-num" style="font-size:${fs1}px">${el.num}</span>`+
+  const fs1 = Math.max(7, Math.floor(size * 0.17));
+  const fs2 = Math.max(9, Math.floor(size * 0.26));
+  const fs3 = Math.max(6, Math.floor(size * 0.14));
+  d.innerHTML =
+    `<span class="el-num" style="font-size:${fs1}px">${el.num}</span>`+
     `<span class="el-sym" style="font-size:${fs2}px">${el.sym}</span>`+
     `<span class="el-name" style="font-size:${fs3}px;padding:0 1px">${el.name}</span>`;
-  if(activeFilter!=='all'&&el.cat!==activeFilter)d.classList.add('dimmed');
-  d.addEventListener('click',()=>showDetail(el));
+  if(activeFilter !== 'all' && el.cat !== activeFilter) d.classList.add('dimmed');
+  d.addEventListener('click', ()=>showDetail(el));
   return d;
 }
 
 function renderGrid(){
-  const size=makeCellSize();
-  const grid=document.getElementById('pt-grid');
-  grid.style.gridTemplateColumns=`40px repeat(18,${size}px)`;
-  grid.innerHTML='';
-  grid.appendChild(Object.assign(document.createElement('div'),{className:'group-label'}));
-  for(let g=1;g<=18;g++){
-    const lbl=document.createElement('div');
-    lbl.className='group-label';
-    lbl.style.cssText=`width:${size}px;font-size:9px`;
-    lbl.textContent=g;
+  const size = makeCellSize();
+  const cellStep = size + GAP; // 셀 크기 + gap
+
+  // ── 제목 & 컨트롤 크기 동적 조절 ──
+  // size 범위 24~52 → 제목 11~20px, 컨트롤 9~14px, 버튼 패딩/gap 비례
+  const titleFS  = Math.round(11 + (size - 24) * (20 - 11) / (52 - 24));
+  const titleMB  = Math.round(6  + (size - 24) * (14 - 6)  / (52 - 24));
+  const ctrlFS   = Math.round(9  + (size - 24) * (14 - 9)  / (52 - 24));
+  const ctrlGap  = Math.round(4  + (size - 24) * (8  - 4)  / (52 - 24));
+  const ctrlMB   = Math.round(6  + (size - 24) * (14 - 6)  / (52 - 24));
+  const btnPadV  = Math.round(3  + (size - 24) * (7  - 3)  / (52 - 24));
+  const btnPadH  = Math.round(8  + (size - 24) * (16 - 8)  / (52 - 24));
+  const btnGap   = Math.round(3  + (size - 24) * (6  - 3)  / (52 - 24));
+  const dotSize  = Math.round(7  + (size - 24) * (12 - 7)  / (52 - 24));
+  const hintFS   = Math.round(9  + (size - 24) * (12 - 9)  / (52 - 24));
+
+  const titleEl = document.querySelector('.pt-title');
+  titleEl.style.fontSize   = titleFS + 'px';
+  titleEl.style.marginBottom = titleMB + 'px';
+
+  const controlsEl = document.querySelector('.controls');
+  controlsEl.style.gap         = ctrlGap + 'px';
+  controlsEl.style.marginBottom = ctrlMB + 'px';
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.style.fontSize = ctrlFS + 'px';
+    btn.style.padding  = `${btnPadV}px ${btnPadH}px`;
+    btn.style.gap      = btnGap + 'px';
+  });
+  document.querySelectorAll('.filter-btn .dot').forEach(dot => {
+    dot.style.width  = dotSize + 'px';
+    dot.style.height = dotSize + 'px';
+  });
+
+  const hintEl = document.querySelector('.hint');
+  if(hintEl) hintEl.style.fontSize = hintFS + 'px';
+
+  // ── 메인 그리드 ──
+  const grid = document.getElementById('pt-grid');
+  grid.style.gridTemplateColumns = `${PERIOD_LBL_W}px repeat(${NUM_GROUPS}, ${size}px)`;
+  grid.innerHTML = '';
+
+  // 헤더 행: 빈 칸 + 족 번호 18개
+  grid.appendChild(Object.assign(document.createElement('div'), {className:'group-label'}));
+  for(let g = 1; g <= NUM_GROUPS; g++){
+    const lbl = document.createElement('div');
+    lbl.className = 'group-label';
+    lbl.style.cssText = `width:${size}px;font-size:9px`;
+    lbl.textContent = g;
     grid.appendChild(lbl);
   }
-  for(let p=1;p<=7;p++){
-    const pl=document.createElement('div');
-    pl.className='period-label';
-    pl.style.cssText=`width:40px;height:${size}px`;
-    pl.textContent=p;
+
+  // 주기 행
+  for(let p = 1; p <= 7; p++){
+    const pl = document.createElement('div');
+    pl.className = 'period-label';
+    pl.style.cssText = `width:${PERIOD_LBL_W}px;height:${size}px`;
+    pl.textContent = p;
     grid.appendChild(pl);
-    for(let g=1;g<=18;g++){
-      if((p===6||p===7)&&g===3){
-        const ph=document.createElement('div');
-        ph.className='placeholder';
-        ph.style.cssText=`width:${size}px;height:${size}px;font-size:${Math.max(7,size*0.15)}px`;
-        ph.textContent=p===6?'57-71':'89-118';
+
+    for(let g = 1; g <= NUM_GROUPS; g++){
+      if((p === 6 || p === 7) && g === 3){
+        const ph = document.createElement('div');
+        ph.className = 'placeholder';
+        ph.style.cssText = `width:${size}px;height:${size}px;font-size:${Math.max(7,size*0.15)}px`;
+        ph.textContent = p === 6 ? '57-71' : '89-118';
         grid.appendChild(ph);
         continue;
       }
-      const el=ELEMENTS.find(e=>e.period===p&&e.group===g&&!(e.num>=57&&e.num<=71)&&!(e.num>=89&&e.num<=118));
-      grid.appendChild(renderCell(el||null,size));
+      const el = ELEMENTS.find(e =>
+        e.period === p && e.group === g &&
+        !(e.num >= 57 && e.num <= 71) &&
+        !(e.num >= 89 && e.num <= 118)
+      );
+      grid.appendChild(renderCell(el || null, size));
     }
   }
-  const cellStep=size+2;
-  const seriesLeftOffset=40+2*cellStep;
-  const seriesWidth=15*cellStep-2;
-  const lantRow=document.getElementById('lant-row');
-  lantRow.innerHTML='';
-  lantRow.style.width=seriesWidth+'px';
-  lantRow.parentElement.style.paddingLeft=seriesLeftOffset+'px';
-  for(let n=57;n<=71;n++){const el=ELEMENTS.find(e=>e.num===n);if(el)lantRow.appendChild(renderCell(el,size));}
-  const actSection=document.getElementById('act-row').parentElement;
-  actSection.style.paddingLeft=seriesLeftOffset+'px';
-  actSection.innerHTML='<div class="series-title">악티늄족 (89–118)</div>'+
-    '<div class="series-row" id="act-row1"></div>'+
-    '<div class="series-row" id="act-row2" style="margin-top:2px"></div>';
-  const actRow1=document.getElementById('act-row1');
-  const actRow2=document.getElementById('act-row2');
-  [actRow1,actRow2].forEach(r=>{r.style.width=seriesWidth+'px';r.style.justifyContent='flex-start';});
-  for(let n=89;n<=103;n++){const el=ELEMENTS.find(e=>e.num===n);if(el)actRow1.appendChild(renderCell(el,size));}
-  for(let n=104;n<=118;n++){const el=ELEMENTS.find(e=>e.num===n);if(el)actRow2.appendChild(renderCell(el,size));}
+
+  // ── 시리즈 섹션 정렬 ──
+  // 3족(group=3)은 grid에서 period-label 다음 3번째 열 → 왼쪽 offset
+  // offset = period-label_W + gap + (3-1) * cellStep = PERIOD_LBL_W + GAP + 2*cellStep
+  const seriesMarginLeft = PERIOD_LBL_W + GAP + 2 * cellStep;
+  // 시리즈 행 너비: 15개 원소 × cellStep - 마지막 gap
+  const seriesWidth15 = 15 * cellStep - GAP;
+
+  // 란타넘족 (57–71): 15개
+  const seriesLant = document.getElementById('series-lant');
+  seriesLant.style.marginLeft = seriesMarginLeft + 'px';
+  const lantRow = document.getElementById('lant-row');
+  lantRow.innerHTML = '';
+  for(let n = 57; n <= 71; n++){
+    const el = ELEMENTS.find(e => e.num === n);
+    if(el) lantRow.appendChild(renderCell(el, size));
+  }
+
+  // 악티늄족 (89–103 첫 줄, 104–118 둘째 줄): 각 15개
+  const seriesAct = document.getElementById('series-act');
+  seriesAct.style.marginLeft = seriesMarginLeft + 'px';
+
+  const actRow1 = document.getElementById('act-row1');
+  actRow1.innerHTML = '';
+  for(let n = 89; n <= 103; n++){
+    const el = ELEMENTS.find(e => e.num === n);
+    if(el) actRow1.appendChild(renderCell(el, size));
+  }
+
+  const actRow2 = document.getElementById('act-row2');
+  actRow2.innerHTML = '';
+  for(let n = 104; n <= 118; n++){
+    const el = ELEMENTS.find(e => e.num === n);
+    if(el) actRow2.appendChild(renderCell(el, size));
+  }
 }
 
 function showDetail(el){
-  document.getElementById('d-sym').textContent=el.sym;
-  document.getElementById('d-name').textContent=el.num+'. '+el.name;
-  document.getElementById('d-sub').textContent=CAT_NAMES[el.cat]||el.cat;
-  document.getElementById('d-num').textContent=el.num;
-  document.getElementById('d-mass').textContent=el.mass;
-  document.getElementById('d-pg').textContent=el.period+'주기 / '+el.group+'족';
-  document.getElementById('d-cat').textContent=CAT_NAMES[el.cat]||el.cat;
-  document.getElementById('d-desc').textContent=el.desc;
-  document.getElementById('d-uses').textContent=el.uses;
-  document.getElementById('d-disc').textContent=el.disc;
-  document.getElementById('detail-header').style.background=getColor(el);
-  const chips=document.getElementById('e-chips');
-  chips.innerHTML='';
-  el.e.forEach((cnt,i)=>{const c=document.createElement('div');c.className='e-chip';c.textContent=SHELLS[i]+'껍질: '+cnt+'e⁻';chips.appendChild(c);});
-  document.getElementById('e-total').textContent='총 전자 수: '+el.e.reduce((a,b)=>a+b,0)+'개';
-  document.getElementById('detail-panel').style.display='flex';
-  window._currentEl=el;
+  document.getElementById('d-sym').textContent = el.sym;
+  document.getElementById('d-name').textContent = el.num + '. ' + el.name;
+  document.getElementById('d-sub').textContent = CAT_NAMES[el.cat] || el.cat;
+  document.getElementById('d-num').textContent = el.num;
+  document.getElementById('d-mass').textContent = el.mass;
+  document.getElementById('d-pg').textContent = el.period + '주기 / ' + el.group + '족';
+  document.getElementById('d-cat').textContent = CAT_NAMES[el.cat] || el.cat;
+  document.getElementById('d-desc').textContent = el.desc;
+  document.getElementById('d-uses').textContent = el.uses;
+  document.getElementById('d-disc').textContent = el.disc;
+  document.getElementById('detail-header').style.background = getColor(el);
+  const chips = document.getElementById('e-chips');
+  chips.innerHTML = '';
+  el.e.forEach((cnt, i) => {
+    const c = document.createElement('div');
+    c.className = 'e-chip';
+    c.textContent = SHELLS[i] + '껍질: ' + cnt + 'e⁻';
+    chips.appendChild(c);
+  });
+  document.getElementById('e-total').textContent = '총 전자 수: ' + el.e.reduce((a,b)=>a+b,0) + '개';
+  document.getElementById('detail-panel').style.display = 'flex';
+  window._currentEl = el;
   requestAnimationFrame(()=>drawAtom(el));
 }
 
 function drawAtom(el){
-  const canvas=document.getElementById('atom-canvas');
-  const ctx=canvas.getContext('2d');
-  const section=document.querySelector('.atom-section');
-  const eInfo=document.querySelector('.electron-info');
-  const atomTitle=document.querySelector('.atom-title');
-  if(!section)return;
-  const secH=section.offsetHeight,secW=section.offsetWidth;
-  const eInfoH=eInfo?eInfo.offsetHeight:60;
-  const titleH=atomTitle?atomTitle.offsetHeight:20;
-  const avail=Math.min(secW-20,secH-eInfoH-titleH-16);
-  const size=Math.max(80,Math.min(200,avail));
-  canvas.width=size;canvas.height=size;
-  canvas.style.width=size+'px';canvas.style.height=size+'px';
-  const cx=size/2,cy=size/2;
-  ctx.clearRect(0,0,size,size);
-  const maxR=Math.min(cx,cy)-8;
-  const step=el.e.length>0?maxR/(el.e.length+0.5):20;
-  const nucR=Math.min(14,step*0.5);
-  ctx.beginPath();ctx.arc(cx,cy,nucR,0,Math.PI*2);ctx.fillStyle='#E24B4A';ctx.fill();
-  const total=el.e.reduce((a,b)=>a+b,0);
-  ctx.fillStyle='white';ctx.font=`bold ${Math.min(11,nucR*0.85)}px sans-serif`;
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(total+'+',cx,cy);
-  el.e.forEach((cnt,si)=>{
-    const r=step*(si+1);
-    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='#378ADD';ctx.lineWidth=1;ctx.stroke();
-    const eR=Math.min(4,step*0.18);
-    for(let i=0;i<cnt;i++){
-      const angle=(2*Math.PI*i)/cnt-Math.PI/2;
-      const ex=cx+r*Math.cos(angle),ey=cy+r*Math.sin(angle);
-      ctx.beginPath();ctx.arc(ex,ey,eR,0,Math.PI*2);ctx.fillStyle='#185FA5';ctx.fill();
-      ctx.fillStyle='white';ctx.font=`bold ${Math.max(5,eR*1.4)}px sans-serif`;ctx.fillText('−',ex,ey+0.5);
+  const canvas = document.getElementById('atom-canvas');
+  const ctx = canvas.getContext('2d');
+  const section = document.querySelector('.atom-section');
+  const eInfo = document.querySelector('.electron-info');
+  const atomTitle = document.querySelector('.atom-title');
+  if(!section) return;
+  const secH = section.offsetHeight, secW = section.offsetWidth;
+  const eInfoH = eInfo ? eInfo.offsetHeight : 60;
+  const titleH = atomTitle ? atomTitle.offsetHeight : 20;
+  const avail = Math.min(secW - 20, secH - eInfoH - titleH - 16);
+  const size = Math.max(80, Math.min(200, avail));
+  canvas.width = size; canvas.height = size;
+  canvas.style.width = size + 'px'; canvas.style.height = size + 'px';
+  const cx = size/2, cy = size/2;
+  ctx.clearRect(0, 0, size, size);
+  const maxR = Math.min(cx, cy) - 8;
+  const step = el.e.length > 0 ? maxR / (el.e.length + 0.5) : 20;
+  const nucR = Math.min(14, step * 0.5);
+  ctx.beginPath(); ctx.arc(cx, cy, nucR, 0, Math.PI*2);
+  ctx.fillStyle = '#E24B4A'; ctx.fill();
+  const total = el.e.reduce((a,b)=>a+b, 0);
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${Math.min(11, nucR*0.85)}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(total + '+', cx, cy);
+  el.e.forEach((cnt, si) => {
+    const r = step * (si + 1);
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.strokeStyle = '#378ADD'; ctx.lineWidth = 1; ctx.stroke();
+    const eR = Math.min(4, step * 0.18);
+    for(let i = 0; i < cnt; i++){
+      const angle = (2*Math.PI*i)/cnt - Math.PI/2;
+      const ex = cx + r*Math.cos(angle), ey = cy + r*Math.sin(angle);
+      ctx.beginPath(); ctx.arc(ex, ey, eR, 0, Math.PI*2);
+      ctx.fillStyle = '#185FA5'; ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${Math.max(5, eR*1.4)}px sans-serif`;
+      ctx.fillText('−', ex, ey + 0.5);
     }
   });
 }
 
-document.getElementById('close-btn').addEventListener('click',()=>{document.getElementById('detail-panel').style.display='none';});
-document.getElementById('detail-panel').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
-document.querySelectorAll('.filter-btn').forEach(btn=>{
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-    this.classList.add('active');activeFilter=this.dataset.cat;renderGrid();
+document.getElementById('close-btn').addEventListener('click', ()=>{
+  document.getElementById('detail-panel').style.display = 'none';
+});
+document.getElementById('detail-panel').addEventListener('click', function(e){
+  if(e.target === this) this.style.display = 'none';
+});
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    activeFilter = this.dataset.cat;
+    renderGrid();
   });
 });
 
 renderGrid();
-window.addEventListener('resize',()=>{
-  clearTimeout(window._rt);
-  window._rt=setTimeout(()=>{renderGrid();if(document.getElementById('detail-panel').style.display!=='none'&&window._currentEl)drawAtom(window._currentEl);},100);
+
+let _resizeTimer;
+window.addEventListener('resize', ()=>{
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(()=>{
+    renderGrid();
+    if(document.getElementById('detail-panel').style.display !== 'none' && window._currentEl){
+      drawAtom(window._currentEl);
+    }
+  }, 100);
 });
 </script>
 </body>
