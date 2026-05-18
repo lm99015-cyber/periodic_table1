@@ -6,16 +6,49 @@
 <title>주기율표</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html{height:100%;background:#f5f5f5}
+html{height:100%;background:#1a1f14}
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  background:#f5f5f5;color:#222;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(34,85,34,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(180,120,40,0.13) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(20,60,100,0.15) 0%, transparent 55%),
+    linear-gradient(135deg, #1a1f14 0%, #2c3320 30%, #1e2a1a 60%, #151c10 100%);
+  color:#222;
   min-height:100%;
   display:flex;align-items:flex-start;justify-content:center;
   padding:12px;
 }
-.pt-wrap{width:fit-content;margin:0 auto;overflow:hidden}
-.pt-title{font-weight:600;color:#222;text-align:center}
+.pt-wrap{
+  width:fit-content;margin:0 auto;overflow:hidden;
+  background:rgba(245,240,225,0.93);
+  border-radius:12px;
+  border:2px solid rgba(180,140,60,0.4);
+  box-shadow:0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+  padding:10px 14px 8px;
+  position:relative;
+}
+/* 모서리 장식 */
+.pt-wrap::before,.pt-wrap::after{
+  content:'✦';
+  position:absolute;
+  font-size:14px;
+  color:rgba(160,110,30,0.6);
+  line-height:1;
+}
+.pt-wrap::before{top:6px;left:8px;}
+.pt-wrap::after{top:6px;right:8px;}
+.pt-title{
+  font-weight:800;
+  background:linear-gradient(135deg,#8B4513 0%,#D4A017 40%,#8B6914 70%,#5C3A00 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-align:center;
+  letter-spacing:0.5px;
+  text-shadow:none;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.pt-title-icon{font-size:0.85em;-webkit-text-fill-color:initial;background:none;-webkit-background-clip:initial}
 .controls{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between}
 .filter-btn{border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;background:#fff;color:#444;cursor:pointer;transition:all 0.15s;font-weight:500;display:flex;align-items:center}
 .filter-btn:hover{border-color:rgba(0,0,0,0.3);filter:brightness(0.95)}
@@ -23,18 +56,18 @@ body{
 .filter-btn .dot{border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,0.15)}
 .table-scroll{overflow:hidden}
 .pt-grid{display:inline-grid;gap:2px}
-.period-label{display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;font-weight:500}
-.group-label{display:flex;align-items:center;justify-content:center;font-size:9px;color:#aaa;padding-bottom:2px}
+.period-label{display:flex;align-items:center;justify-content:center;font-size:10px;color:#7a5c1e;font-weight:600}
+.group-label{display:flex;align-items:center;justify-content:center;font-size:9px;color:#b08030;padding-bottom:2px;font-weight:500}
 .el-cell{border-radius:4px;border:1px solid rgba(0,0,0,0.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform 0.1s,box-shadow 0.1s;overflow:hidden}
 .el-cell:hover{transform:scale(1.05);z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.15)}
 .el-cell.dimmed{opacity:0.15}
 .el-num{line-height:1;color:rgba(0,0,0,0.5)}
 .el-sym{font-weight:600;line-height:1.1;color:rgba(0,0,0,0.85)}
 .el-name{line-height:1;color:rgba(0,0,0,0.55);width:100%;text-align:center;overflow:hidden;white-space:nowrap;}
-.placeholder{border-radius:4px;border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;color:#aaa;cursor:default}
+.placeholder{border-radius:4px;border:1px dashed #b08030;display:flex;align-items:center;justify-content:center;color:#b08030;cursor:default;background:rgba(180,130,40,0.07)}
 .empty{background:transparent;border:none}
 .series-section{margin-top:8px;overflow:hidden}
-.series-title{color:#666;margin-bottom:4px;font-weight:500}
+.series-title{color:#7a5c1e;margin-bottom:4px;font-weight:700;letter-spacing:0.3px}
 .series-row{display:flex;gap:2px;flex-wrap:nowrap}
 .detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;z-index:100;padding:20px 16px 16px;gap:10px;flex-wrap:wrap}
 .detail-card{background:#fff;border-radius:16px;width:100%;max-width:382px;max-height:calc(100vh - 70px);box-shadow:0 12px 40px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
@@ -85,23 +118,24 @@ body{
 .action-btn.save-btn:hover{background:#2c6fd4}
 .action-btn:active{transform:scale(0.96)}
 .action-btn.success{background:#22c55e!important;color:#fff!important}
-.hint{margin-top:10px;text-align:center;color:#aaa}
+.hint{margin-top:10px;text-align:center;color:rgba(100,80,30,0.7);font-style:italic}
 
 .map-btn{
   display:inline-flex;align-items:center;gap:5px;
-  color:#5c7a2e;font-weight:600;text-decoration:none;
-  border:1.5px solid #b5d97a;border-radius:20px;
-  background:#f0fde0;
+  color:#5c3a00;font-weight:700;text-decoration:none;
+  border:1.5px solid #c8961e;border-radius:20px;
+  background:linear-gradient(135deg,#f5e6b0,#edd87a);
   transition:all .15s;
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   white-space:nowrap;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(140,90,0,0.2);
 }
-.map-btn:hover{background:#d4f5a0;border-color:#8ac840;filter:brightness(0.95)}
+.map-btn:hover{background:linear-gradient(135deg,#edd87a,#d4a017);border-color:#a07010;filter:brightness(1.05)}
 </style>
 </head>
 <body>
 <div class="pt-wrap" id="pt-wrap">
-  <div class="pt-title">주기율표 (원자번호 1–118)</div>
+  <div class="pt-title"><span class="pt-title-icon">🧭</span> 118개 원소 주기율표 탐험 <span class="pt-title-icon">⚗️</span></div>
   <div class="controls">
     <a class="map-btn" id="mapBtn" href="https://lm99015-cyber.github.io/main_map/">← 원소 탐험맵으로</a>
     <div style="display:flex;gap:inherit;align-items:center">
