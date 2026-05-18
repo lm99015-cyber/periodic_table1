@@ -307,7 +307,7 @@ function makeCellSize(){
 
   // ── 세로 기준 ──
   // byW 기준 예상 셀 크기로 비그리드 높이 추정 후 충분한 여유(80px) 확보
-  const estSize = Math.max(24, Math.min(52, byW));
+  const estSize = Math.max(24, Math.min(60, byW));
   const titleFS  = Math.round(11 + (estSize-24)*(20-11)/(52-24));
   const titleMB  = Math.round(6  + (estSize-24)*(14-6) /(52-24));
   const btnPadV  = Math.round(3  + (estSize-24)*(7-3)  /(52-24));
@@ -327,10 +327,10 @@ function makeCellSize(){
     14 + (sTitleFS*1.6 + 4 + estSize + 2) +               // 악티늄족 (margin-top + title + row1만)
     (hintFS * 1.4 + 14) +                        // hint + margin
     24 +                                         // body padding top+bottom
-    100;                                         // 안전 여유 (여유롭게 확보)
+    40;                                          // 안전 여유 (최소화하여 꽉 차게)
 
   const byH = Math.floor((vh - nonGridH - GAP * 7) / 8);
-  return Math.max(20, Math.min(52, Math.min(byW, byH)));
+  return Math.max(20, Math.min(60, Math.min(byW, byH)));
 }
 
 function getColor(el){return CAT_COLORS[el.cat]||'#ccc';}
