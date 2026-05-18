@@ -40,15 +40,11 @@ body{
 .pt-wrap::after{top:6px;right:8px;}
 .pt-title{
   font-weight:800;
-  background:linear-gradient(135deg,#8B4513 0%,#D4A017 40%,#8B6914 70%,#5C3A00 100%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  color:#3b2000;
   text-align:center;
   letter-spacing:0.5px;
-  text-shadow:none;
-  position:relative;
-  display:flex;align-items:center;justify-content:center;gap:6px;
+  text-shadow:0 1px 0 rgba(255,255,255,0.6);
 }
-.pt-title-icon{font-size:0.85em;-webkit-text-fill-color:initial;background:none;-webkit-background-clip:initial}
 .controls{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between}
 .filter-btn{border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;background:#fff;color:#444;cursor:pointer;transition:all 0.15s;font-weight:500;display:flex;align-items:center}
 .filter-btn:hover{border-color:rgba(0,0,0,0.3);filter:brightness(0.95)}
@@ -135,7 +131,7 @@ body{
 </head>
 <body>
 <div class="pt-wrap" id="pt-wrap">
-  <div class="pt-title"><span class="pt-title-icon">🧭</span> 118개 원소 주기율표 탐험 <span class="pt-title-icon">⚗️</span></div>
+  <div class="pt-title">118개 원소 주기율표 탐험</div>
   <div class="controls">
     <a class="map-btn" id="mapBtn" href="https://lm99015-cyber.github.io/main_map/">← 원소 탐험맵으로</a>
     <div style="display:flex;gap:inherit;align-items:center">
