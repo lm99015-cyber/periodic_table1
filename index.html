@@ -16,7 +16,7 @@ body{
 }
 .pt-wrap{width:fit-content;margin:0 auto;overflow:hidden}
 .pt-title{font-weight:600;color:#222;text-align:center}
-.controls{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center}
+.controls{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between}
 .filter-btn{border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;background:#fff;color:#444;cursor:pointer;transition:all 0.15s;font-weight:500;display:flex;align-items:center}
 .filter-btn:hover{border-color:rgba(0,0,0,0.3);filter:brightness(0.95)}
 .filter-btn.active{border-color:rgba(0,0,0,0.35);filter:brightness(0.88);font-weight:600;color:#222}
@@ -30,13 +30,13 @@ body{
 .el-cell.dimmed{opacity:0.15}
 .el-num{line-height:1;color:rgba(0,0,0,0.5)}
 .el-sym{font-weight:600;line-height:1.1;color:rgba(0,0,0,0.85)}
-.el-name{line-height:1;color:rgba(0,0,0,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
+.el-name{line-height:1.1;color:rgba(0,0,0,0.55);overflow:hidden;width:100%;text-align:center;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .placeholder{border-radius:4px;border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;color:#aaa;cursor:default}
 .empty{background:transparent;border:none}
 .series-section{margin-top:14px;overflow:hidden}
 .series-title{color:#666;margin-bottom:4px;font-weight:500}
 .series-row{display:flex;gap:2px;flex-wrap:nowrap}
-.detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;gap:10px;flex-wrap:wrap}
+.detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;z-index:100;padding:20px 16px 16px;gap:10px;flex-wrap:wrap}
 .detail-card{background:#fff;border-radius:16px;width:100%;max-width:382px;max-height:calc(100vh - 70px);box-shadow:0 12px 40px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
 .detail-header{padding:12px 14px 10px;border-radius:16px 16px 0 0;flex-shrink:0;position:relative;display:flex;align-items:flex-start;gap:10px}
 .dh-sym-box{display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(0,0,0,0.12);flex-shrink:0}
@@ -86,16 +86,30 @@ body{
 .action-btn:active{transform:scale(0.96)}
 .action-btn.success{background:#22c55e!important;color:#fff!important}
 .hint{margin-top:10px;text-align:center;color:#aaa}
+
+.map-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  color:#5c7a2e;font-weight:600;text-decoration:none;
+  border:1.5px solid #b5d97a;border-radius:20px;
+  background:#f0fde0;
+  transition:all .15s;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  white-space:nowrap;flex-shrink:0;
+}
+.map-btn:hover{background:#d4f5a0;border-color:#8ac840;filter:brightness(0.95)}
 </style>
 </head>
 <body>
 <div class="pt-wrap" id="pt-wrap">
   <div class="pt-title">주기율표 (원자번호 1–118)</div>
   <div class="controls">
+    <a class="map-btn" id="mapBtn" href="https://lm99015-cyber.github.io/main_map/">← 원소 탐험맵으로</a>
+    <div style="display:flex;gap:inherit;align-items:center">
     <button class="filter-btn active" data-cat="all" style="background:#f0f0f0">전체</button>
     <button class="filter-btn" data-cat="metal" style="background:#85B7EB"><span class="dot" style="background:#378ADD"></span>금속</button>
     <button class="filter-btn" data-cat="metalloid" style="background:#C0DD97"><span class="dot" style="background:#639922"></span>준금속</button>
     <button class="filter-btn" data-cat="nonmetal" style="background:#FAC775"><span class="dot" style="background:#BA7517"></span>비금속</button>
+    </div>
   </div>
   <div class="table-scroll">
     <div id="pt-grid" class="pt-grid"></div>
@@ -294,9 +308,9 @@ let activeFilter='all';
 const PERIOD_LBL_W = 40;
 const GAP = 2;
 const NUM_GROUPS = 18;
+let cellSize = 36; // 전역 셀 크기 (positionMapBtn 등에서 참조)
 
 function makeCellSize(){
-  // 크롬 포함 모든 브라우저에서 실제 가용 너비를 최대한 크게 측정
   const vw = Math.max(
     document.documentElement.clientWidth,
     window.innerWidth || 0
@@ -306,37 +320,42 @@ function makeCellSize(){
     window.innerHeight || 0
   );
 
-  // ── 가로 기준 ──
-  // 19열(period-label 1 + 그룹 18), gap 18개
-  // 안전마진 4px: 최소화하여 꽉 차게
+  // 가로 기준
   const byW = Math.floor((vw - 24 - 4 - PERIOD_LBL_W - GAP * NUM_GROUPS) / NUM_GROUPS);
 
-  // ── 세로 기준 ──
-  // byW 기준 예상 셀 크기로 비그리드 높이 추정 후 충분한 여유(80px) 확보
-  const estSize = Math.max(24, Math.min(60, byW));
-  const titleFS  = Math.round(11 + (estSize-24)*(20-11)/(52-24));
-  const titleMB  = Math.round(6  + (estSize-24)*(14-6) /(52-24));
-  const btnPadV  = Math.round(3  + (estSize-24)*(7-3)  /(52-24));
-  const ctrlFS   = Math.round(9  + (estSize-24)*(14-9) /(52-24));
-  const ctrlMB   = Math.round(6  + (estSize-24)*(14-6) /(52-24));
-  const sTitleFS = Math.round(8  + (estSize-24)*(14-8) /(52-24));
-  const hintFS   = Math.round(9  + (estSize-24)*(12-9) /(52-24));
+  // nonGridH를 셀 크기로 계산하는 함수 (size에 따라 달라짐)
+  function calcNonGridH(s){
+    const clamp = (v,mn,mx) => Math.min(mx, Math.max(mn, v));
+    const t = clamp(s, 24, 60);
+    const titleFS  = Math.round(11 + (t-24)*(20-11)/(52-24));
+    const titleMB  = Math.round(6  + (t-24)*(14-6) /(52-24));
+    const btnPadV  = Math.round(3  + (t-24)*(7-3)  /(52-24));
+    const ctrlFS   = Math.round(9  + (t-24)*(14-9) /(52-24));
+    const ctrlMB   = Math.round(6  + (t-24)*(14-6) /(52-24));
+    const sTitleFS = Math.round(8  + (t-24)*(14-8) /(52-24));
+    const hintFS   = Math.round(9  + (t-24)*(12-9) /(52-24));
+    const mapBtnH  = Math.round(t * 0.6 + 6);   // 탐험맵 버튼 높이
+    return (
+      mapBtnH +                                  // 탐험맵 버튼
+      (titleFS + titleMB) +                      // 제목
+      (btnPadV*2 + ctrlFS + ctrlMB) * 1.2 +     // 필터버튼
+      14 + (sTitleFS + t + 6) +                  // 란타넘족 (margin+title+row)
+      14 + (sTitleFS + t + 6) +                  // 악티늄족 (margin+title+row)
+      (hintFS + 14) +                            // hint
+      24 + 20                                    // body padding + 최소 안전여유
+    );
+  }
 
-  // nonGridH: 그리드 외 요소 높이 합산
-  // series-section margin-top: 14px × 2개
-  // 악티늄족: title + row1(size) + margin(2px) + row2(size)
-  // 안전여유를 충분히 크게 잡아 104~118행이 잘리지 않도록
-  const nonGridH =
-    (titleFS + titleMB) +                        // 제목
-    (btnPadV*2 + ctrlFS + ctrlMB) * 1.4 +       // 필터버튼
-    14 + (sTitleFS*1.6 + 4 + estSize + 2) +      // 란타넘족 (margin-top + title + row)
-    14 + (sTitleFS*1.6 + 4 + estSize + 2) +               // 악티늄족 (margin-top + title + row1만)
-    (hintFS * 1.4 + 14) +                        // hint + margin
-    24 +                                         // body padding top+bottom
-    40;                                          // 안전 여유 (최소화하여 꽉 차게)
-
-  const byH = Math.floor((vh - nonGridH - GAP * 7) / 8);
-  return Math.max(20, Math.min(60, Math.min(byW, byH)));
+  // 반복 수렴: size와 nonGridH가 서로 의존하므로 5회 반복으로 수렴
+  let size = Math.min(byW, 60);
+  for(let i = 0; i < 5; i++){
+    const ngh  = calcNonGridH(size);
+    const byH  = Math.floor((vh - ngh - GAP * 7) / 8);
+    const next = Math.max(20, Math.min(60, Math.min(byW, byH)));
+    if(next === size) break;
+    size = next;
+  }
+  return size;
 }
 
 function getColor(el){return CAT_COLORS[el.cat]||'#ccc';}
@@ -352,7 +371,7 @@ function renderCell(el, size){
   d.style.cssText=`width:${size}px;height:${size}px;background:${getColor(el)}`;
   const fs1 = Math.max(10, Math.floor(size * 0.20)); // 원자번호
   const fs2 = Math.max(13, Math.floor(size * 0.32)); // 원소기호
-  const fs3 = Math.max(8,  Math.floor(size * 0.18)); // 한글이름
+  const fs3 = Math.max(10, Math.floor(size * 0.22)); // 한글이름 (최소 10px 보장)
   d.innerHTML =
     `<span class="el-num" style="font-size:${fs1}px">${el.num}</span>`+
     `<span class="el-sym" style="font-size:${fs2}px">${el.sym}</span>`+
@@ -364,6 +383,7 @@ function renderCell(el, size){
 
 function renderGrid(){
   const size = makeCellSize();
+  cellSize = size; // 전역 갱신
   const cellStep = size + GAP;
 
   // 동적 크기 계산 (기존과 동일)
@@ -392,6 +412,12 @@ function renderGrid(){
     btn.style.padding  = `${btnPadV}px ${btnPadH}px`;
     btn.style.gap      = btnGap + 'px';
   });
+  // map-btn 크기를 filter-btn과 동일하게
+  const mapBtn = document.getElementById('mapBtn');
+  if(mapBtn){
+    mapBtn.style.fontSize = ctrlFS + 'px';
+    mapBtn.style.padding  = `${btnPadV}px ${btnPadH}px`;
+  }
   document.querySelectorAll('.filter-btn .dot').forEach(dot => {
     dot.style.width  = dotSize + 'px';
     dot.style.height = dotSize + 'px';
