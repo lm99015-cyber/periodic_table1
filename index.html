@@ -33,9 +33,9 @@ body{
 .el-name{line-height:1;color:rgba(0,0,0,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;text-align:center}
 .placeholder{border-radius:4px;border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;color:#aaa;cursor:default}
 .empty{background:transparent;border:none}
-.series-section{margin-top:14px}
+.series-section{margin-top:14px;overflow:hidden}
 .series-title{color:#666;margin-bottom:4px;font-weight:500}
-.series-row{display:flex;gap:2px;flex-wrap:nowrap;overflow:hidden}
+.series-row{display:flex;gap:2px;flex-wrap:nowrap}
 .detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;gap:10px;flex-wrap:wrap}
 .detail-card{background:#fff;border-radius:16px;width:100%;max-width:420px;max-height:calc(100vh - 32px);box-shadow:0 12px 40px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
 .detail-header{padding:18px 18px 14px;border-radius:16px 16px 0 0;flex-shrink:0;position:relative;display:flex;align-items:flex-start;gap:14px}
@@ -105,9 +105,9 @@ body{
     <div class="series-row" id="lant-row"></div>
   </div>
   <div class="series-section" id="series-act">
-    <div class="series-title" id="act-title">악티늄족 (89–118)</div>
+    <div class="series-title" id="act-title">악티늄족 (89–103)</div>
     <div class="series-row" id="act-row1"></div>
-    <div class="series-row" id="act-row2" style="margin-top:2px"></div>
+    <div class="series-row" id="act-row2" style="display:none"></div>
   </div>
   <div class="hint">원소를 클릭하면 상세 정보를 볼 수 있습니다</div>
 </div>
@@ -316,17 +316,21 @@ function makeCellSize(){
   const sTitleFS = Math.round(8  + (estSize-24)*(14-8) /(52-24));
   const hintFS   = Math.round(9  + (estSize-24)*(12-9) /(52-24));
 
+  // nonGridH: 그리드 외 요소 높이 합산
+  // series-section margin-top: 14px × 2개
+  // 악티늄족: title + row1(size) + margin(2px) + row2(size)
+  // 안전여유를 충분히 크게 잡아 104~118행이 잘리지 않도록
   const nonGridH =
-    (titleFS + titleMB) +                    // 제목
-    (btnPadV*2 + ctrlFS + ctrlMB) * 1.4 +   // 필터버튼 (line-height 여유)
-    (sTitleFS*1.4 + 4 + estSize + 14) +      // 란타넘족 title+row+margin
-    (sTitleFS*1.4 + 4 + estSize*2 + 2 + 14) + // 악티늄족 title+row*2+margin
-    (hintFS + 20) +                          // hint
-    24 +                                     // body padding
-    80;                                      // 안전 여유 (충분히 크게)
+    (titleFS + titleMB) +                        // 제목
+    (btnPadV*2 + ctrlFS + ctrlMB) * 1.4 +       // 필터버튼
+    14 + (sTitleFS*1.6 + 4 + estSize + 2) +      // 란타넘족 (margin-top + title + row)
+    14 + (sTitleFS*1.6 + 4 + estSize + 2) +               // 악티늄족 (margin-top + title + row1만)
+    (hintFS * 1.4 + 14) +                        // hint + margin
+    24 +                                         // body padding top+bottom
+    100;                                         // 안전 여유 (여유롭게 확보)
 
   const byH = Math.floor((vh - nonGridH - GAP * 7) / 8);
-  return Math.max(24, Math.min(52, Math.min(byW, byH)));
+  return Math.max(20, Math.min(52, Math.min(byW, byH)));
 }
 
 function getColor(el){return CAT_COLORS[el.cat]||'#ccc';}
@@ -422,24 +426,29 @@ function renderGrid(){
         const ph = document.createElement('div');
         ph.className = 'placeholder';
         ph.style.cssText = `width:${size}px;height:${size}px;font-size:${Math.max(7,size*0.15)}px`;
-        ph.textContent = p === 6 ? '57-71' : '89-118';
+        ph.textContent = p === 6 ? '57-71' : '89-103';
         grid.appendChild(ph);
         continue;
       }
       const el = ELEMENTS.find(e =>
         e.period === p && e.group === g &&
         !(e.num >= 57 && e.num <= 71) &&
-        !(e.num >= 89 && e.num <= 118)
+        !(e.num >= 89 && e.num <= 103)
       );
       grid.appendChild(renderCell(el || null, size));
     }
   }
 
   // 시리즈 섹션 정렬
-  const seriesMarginLeft = PERIOD_LBL_W + GAP + 2 * cellStep;
+  // group3 시작 위치 = period-label(40) + gap(2) + 2*cellStep
+  const seriesPadLeft = PERIOD_LBL_W + GAP + 2 * cellStep;
 
+  // 란타넘족
   const seriesLant = document.getElementById('series-lant');
-  seriesLant.style.marginLeft = seriesMarginLeft + 'px';
+  seriesLant.style.marginLeft = '0';
+  seriesLant.style.paddingLeft = seriesPadLeft + 'px';
+  const lantTitle = document.getElementById('lant-title');
+  if(lantTitle) lantTitle.style.marginLeft = '0';
   const lantRow = document.getElementById('lant-row');
   lantRow.innerHTML = '';
   for(let n = 57; n <= 71; n++){
@@ -447,8 +456,12 @@ function renderGrid(){
     if(el) lantRow.appendChild(renderCell(el, size));
   }
 
+  // 악티늄족
   const seriesAct = document.getElementById('series-act');
-  seriesAct.style.marginLeft = seriesMarginLeft + 'px';
+  seriesAct.style.marginLeft = '0';
+  seriesAct.style.paddingLeft = seriesPadLeft + 'px';
+  const actTitle = document.getElementById('act-title');
+  if(actTitle) actTitle.style.marginLeft = '0';
 
   const actRow1 = document.getElementById('act-row1');
   actRow1.innerHTML = '';
@@ -457,12 +470,9 @@ function renderGrid(){
     if(el) actRow1.appendChild(renderCell(el, size));
   }
 
+  // 104~118은 7주기 메인 그리드에 표시 (act-row2 미사용)
   const actRow2 = document.getElementById('act-row2');
   actRow2.innerHTML = '';
-  for(let n = 104; n <= 118; n++){
-    const el = ELEMENTS.find(e => e.num === n);
-    if(el) actRow2.appendChild(renderCell(el, size));
-  }
 }
 
 function showDetail(el){
