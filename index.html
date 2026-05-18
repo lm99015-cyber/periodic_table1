@@ -30,7 +30,7 @@ body{
 .el-cell.dimmed{opacity:0.15}
 .el-num{line-height:1;color:rgba(0,0,0,0.5)}
 .el-sym{font-weight:600;line-height:1.1;color:rgba(0,0,0,0.85)}
-.el-name{line-height:1.1;color:rgba(0,0,0,0.55);overflow:hidden;width:100%;text-align:center;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.el-name{line-height:1;color:rgba(0,0,0,0.55);width:100%;text-align:center;overflow:hidden;white-space:nowrap;}
 .placeholder{border-radius:4px;border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;color:#aaa;cursor:default}
 .empty{background:transparent;border:none}
 .series-section{margin-top:8px;overflow:hidden}
@@ -332,15 +332,14 @@ function makeCellSize(){
     const ctrlFS   = Math.round(9  + (t-24)*(13-9) /(52-24));
     const ctrlMB   = Math.round(4  + (t-24)*(8-4)  /(52-24));
     const sTitleFS = Math.round(8  + (t-24)*(12-8) /(52-24));
-    const mapBtnH  = Math.round(t * 0.55 + 4);
+    // 탐험맵 버튼은 controls와 같은 줄 → 별도 높이 없음
     return (
-      mapBtnH +                                  // 탐험맵 버튼
       (titleFS + titleMB) +                      // 제목
-      (btnPadV*2 + ctrlFS + ctrlMB) * 1.15 +    // 필터버튼
-      8 + (sTitleFS + t + 2) +                   // 란타넘족 (margin 8 + title + row)
-      8 + (sTitleFS + t + 2) +                   // 악티늄족 (margin 8 + title + row)
-      16 +                                       // hint
-      20 + 8                                     // body padding + 안전여유
+      (btnPadV*2 + ctrlFS + ctrlMB) * 1.15 +    // 필터버튼 (탐험맵버튼 포함)
+      8 + (sTitleFS + t + 2) +                   // 란타넘족
+      8 + (sTitleFS + t + 2) +                   // 악티늄족
+      8 +                                        // hint (최소)
+      20 + 6                                     // body padding + 최소 안전여유
     );
   }
 
@@ -369,11 +368,17 @@ function renderCell(el, size){
   d.style.cssText=`width:${size}px;height:${size}px;background:${getColor(el)}`;
   const fs1 = Math.max(10, Math.floor(size * 0.20)); // 원자번호
   const fs2 = Math.max(13, Math.floor(size * 0.32)); // 원소기호
-  const fs3 = Math.max(10, Math.floor(size * 0.22)); // 한글이름 (최소 10px 보장)
+  const fs3Base = Math.max(10, Math.floor(size * 0.22));
+  // 글자 수에 따라 폰트 자동 축소 (5글자 이상 잘림 방지)
+  const nameLen = el.name.length;
+  const fs3 = nameLen <= 3
+    ? fs3Base
+    : Math.max(8, Math.min(fs3Base, Math.floor(size * 0.88 / nameLen)));
+  const letterSpacing = nameLen >= 5 ? '-0.04em' : '0';
   d.innerHTML =
     `<span class="el-num" style="font-size:${fs1}px">${el.num}</span>`+
     `<span class="el-sym" style="font-size:${fs2}px">${el.sym}</span>`+
-    `<span class="el-name" style="font-size:${fs3}px;padding:0 1px">${el.name}</span>`;
+    `<span class="el-name" style="font-size:${fs3}px;padding:0 2px;letter-spacing:${letterSpacing}">${el.name}</span>`;
   if(activeFilter !== 'all' && el.cat !== activeFilter) d.classList.add('dimmed');
   d.addEventListener('click', ()=>showDetail(el));
   return d;
