@@ -357,7 +357,7 @@ function makeCellSize(){
   function calcNonGridH(s){
     const t = Math.min(Math.max(s, 20), 60);
     const titleFS  = Math.round(11 + (t-24)*(20-11)/(52-24));
-    const titleMB  = Math.round(4  + (t-24)*(8-4)  /(52-24));
+    const titleMB  = Math.round(2  + (t-24)*(4-2)  /(52-24));
     const btnPadV  = Math.round(3  + (t-24)*(6-3)  /(52-24));
     const ctrlFS   = Math.round(9  + (t-24)*(13-9) /(52-24));
     const ctrlMB   = Math.round(4  + (t-24)*(8-4)  /(52-24));
@@ -421,7 +421,7 @@ function renderGrid(){
 
   // 동적 크기 계산 (기존과 동일)
   const titleFS  = Math.round(11 + (size - 24) * (20 - 11) / (52 - 24));
-  const titleMB  = Math.round(6  + (size - 24) * (14 - 6)  / (52 - 24));
+  const titleMB  = Math.round(2  + (size - 24) * (6  - 2)  / (52 - 24));
   const ctrlFS   = Math.round(9  + (size - 24) * (14 - 9)  / (52 - 24));
   const ctrlGap  = Math.round(4  + (size - 24) * (8  - 4)  / (52 - 24));
   const ctrlMB   = Math.round(6  + (size - 24) * (14 - 6)  / (52 - 24));
