@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
 <title>주기율표 탐험으로 배우는 원소</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -59,7 +60,7 @@ body{
 .el-cell.dimmed{opacity:0.15}
 .el-num{line-height:1;color:rgba(0,0,0,0.5)}
 .el-sym{font-weight:600;line-height:1.1;color:rgba(0,0,0,0.85)}
-.el-name{line-height:1;color:rgba(0,0,0,0.55);width:100%;text-align:center;overflow:hidden;white-space:nowrap;}
+.el-name{line-height:1;color:rgba(0,0,0,0.55);width:100%;text-align:center;overflow:hidden;white-space:nowrap;font-family:'Noto Sans KR',sans-serif;letter-spacing:-0.06em;font-weight:500}
 .placeholder{border-radius:4px;border:1px dashed #b08030;display:flex;align-items:center;justify-content:center;color:#b08030;cursor:default;background:rgba(180,130,40,0.07)}
 .empty{background:transparent;border:none}
 .series-section{margin-top:8px;overflow:hidden}
@@ -153,7 +154,6 @@ body{
     <div class="series-row" id="act-row1"></div>
     <div class="series-row" id="act-row2" style="display:none"></div>
   </div>
-  <div class="hint">원소를 클릭하면 상세 정보를 볼 수 있습니다</div>
 </div>
 
 <div class="detail-panel" id="detail-panel" style="display:none">
@@ -396,14 +396,14 @@ function renderCell(el, size){
   }
   d.className='el-cell';
   d.style.cssText=`width:${size}px;height:${size}px;background:${getColor(el)}`;
-  const fs1 = Math.max(10, Math.floor(size * 0.20)); // 원자번호
-  const fs2 = Math.max(13, Math.floor(size * 0.32)); // 원소기호
-  const fs3Base = Math.max(10, Math.floor(size * 0.22));
-  // 글자 수에 따라 폰트 자동 축소 (5글자 이상 잘림 방지)
+  const fs1 = 10; // 원자번호 고정 10px
+  const fs2 = 17; // 원소기호 고정 17px
+  // 4글자 기준 크기로 통일, 5글자 이상만 축소
+  const fs3_4char = Math.max(10, Math.floor(size * 0.88 / 4));
   const nameLen = el.name.length;
-  const fs3 = nameLen <= 3
-    ? fs3Base
-    : Math.max(8, Math.min(fs3Base, Math.floor(size * 0.88 / nameLen)));
+  const fs3 = nameLen <= 4
+    ? fs3_4char
+    : Math.max(8, Math.floor(size * 0.88 / nameLen));
   const letterSpacing = nameLen >= 5 ? '-0.04em' : '0';
   d.innerHTML =
     `<span class="el-num" style="font-size:${fs1}px">${el.num}</span>`+
