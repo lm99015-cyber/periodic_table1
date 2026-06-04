@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- 주기율표 탐색 화면 : 전체 주기율표를 보여 주고, 원소를 누르면 자세한 정보 창이 열립니다.
+     <style>은 디자인을, <body>는 화면에 놓이는 요소를, <script>는 데이터 처리와 클릭·계산 동작을 담당합니다. -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -6,8 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700&display=swap" rel="stylesheet">
 <title>원소 탐험</title>
 <style>
+/* 브라우저 기본 여백 초기화 기능 : 모든 요소의 기본 여백을 0으로 맞추고, 크기 계산 방식을 통일합니다. */
 *{box-sizing:border-box;margin:0;padding:0}
+
+/* 페이지 배경 기본색 기능 : 화면 전체 높이를 채우고 어두운 초록빛 배경을 깔아 줍니다. */
 html{height:100%;background:#1a1f14}
+
+/* 전체 배경 그라데이션 기능 : 여러 색의 번지는 빛과 대각선 그라데이션을 겹쳐 깊이 있는 배경을 만들고, 주기율표를 화면 위쪽 가운데에 배치합니다. */
 body{
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   background:
@@ -20,6 +27,8 @@ body{
   display:flex;align-items:flex-start;justify-content:center;
   padding:4px 12px 12px;
 }
+
+/* 주기율표 카드 틀 기능 : 주기율표 전체를 감싸는 종이 질감의 카드입니다. 둥근 모서리와 그림자로 입체감을 줍니다. */
 .pt-wrap{
   width:fit-content;margin:0 auto;overflow:hidden;
   background:rgba(245,240,225,0.93);
@@ -29,7 +38,8 @@ body{
   padding:10px 14px 8px;
   position:relative;
 }
-/* 모서리 장식 */
+
+/* 카드 모서리 장식 기능 : 카드 양쪽 위 모서리에 작은 ✦ 장식을 넣습니다. */
 .pt-wrap::before,.pt-wrap::after{
   content:'✦';
   position:absolute;
@@ -39,6 +49,8 @@ body{
 }
 .pt-wrap::before{top:6px;left:8px;}
 .pt-wrap::after{top:6px;right:8px;}
+
+/* 주기율표 제목 글씨 기능 : 카드 맨 위 제목의 색·정렬·그림자를 정합니다. */
 .pt-title{
   font-weight:800;
   color:#3b2000;
@@ -46,28 +58,54 @@ body{
   letter-spacing:0.5px;
   text-shadow:0 1px 0 rgba(255,255,255,0.6);
 }
+
+/* 상단 버튼 줄 배치 기능 : 홈 버튼과 분류 필터 버튼들을 한 줄에 양 끝으로 벌려 놓습니다. */
 .controls{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between}
+
+/* 분류 필터 버튼 기능 : 금속·준금속·비금속을 거르는 버튼의 모양과, 마우스를 올리거나 선택했을 때의 변화를 정합니다. dot은 버튼 안의 색상 점입니다. */
 .filter-btn{border:1.5px solid rgba(0,0,0,0.15);border-radius:20px;background:#fff;color:#444;cursor:pointer;transition:all 0.15s;font-weight:500;display:flex;align-items:center}
 .filter-btn:hover{border-color:rgba(0,0,0,0.3);filter:brightness(0.95)}
 .filter-btn.active{border-color:rgba(0,0,0,0.35);filter:brightness(0.88);font-weight:600;color:#222}
 .filter-btn .dot{border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,0.15)}
+
+/* 표 영역 넘침 정리 기능 : 주기율표 격자가 영역을 벗어나면 잘라 냅니다. */
 .table-scroll{overflow:hidden}
+
+/* 주기율표 격자 기능 : 원소 칸들을 바둑판처럼 배열하는 격자입니다. */
 .pt-grid{display:inline-grid;gap:2px}
+
+/* 주기·족 번호 글씨 기능 : 격자 왼쪽의 주기 번호와 위쪽의 족 번호 글씨 스타일입니다. */
 .period-label{display:flex;align-items:center;justify-content:center;font-size:10px;color:#7a5c1e;font-weight:600}
 .group-label{display:flex;align-items:center;justify-content:center;font-size:9px;color:#b08030;padding-bottom:2px;font-weight:500}
+
+/* 원소 칸 기능 : 원소 하나를 나타내는 칸입니다. 마우스를 올리면 살짝 커지고, 필터에서 제외되면 흐려집니다. */
 .el-cell{border-radius:4px;border:1px solid rgba(0,0,0,0.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform 0.1s,box-shadow 0.1s;overflow:hidden}
 .el-cell:hover{transform:scale(1.05);z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.15)}
 .el-cell.dimmed{opacity:0.15}
+
+/* 원소 칸 안 글씨 기능 : 칸 안의 원자번호·기호·이름 글씨 스타일입니다. */
 .el-num{line-height:1;color:rgba(0,0,0,0.5)}
 .el-sym{font-weight:600;line-height:1.1;color:rgba(0,0,0,0.85)}
 .el-name{line-height:1;color:rgba(0,0,0,0.55);width:100%;text-align:center;overflow:hidden;white-space:nowrap;font-family:'Noto Sans KR',sans-serif;letter-spacing:-0.06em;font-weight:500}
+
+/* 자리 표시 칸 기능 : 란타넘족·악티늄족이 들어갈 자리를 점선 칸으로 표시합니다. */
 .placeholder{border-radius:4px;border:1px dashed #b08030;display:flex;align-items:center;justify-content:center;color:#b08030;cursor:default;background:rgba(180,130,40,0.07)}
+
+/* 빈 칸 기능 : 원소가 없는 격자 자리를 투명하게 비워 둡니다. */
 .empty{background:transparent;border:none}
+
+/* 란타넘·악티늄족 줄 기능 : 본 표 아래에 따로 배치하는 두 계열의 제목과 가로 줄 배치입니다. */
 .series-section{margin-top:8px;overflow:hidden}
 .series-title{color:#7a5c1e;margin-bottom:4px;font-weight:700;letter-spacing:0.3px}
 .series-row{display:flex;gap:2px;flex-wrap:nowrap}
+
+/* 상세 정보 배경막 기능 : 원소를 클릭하면 화면 전체를 덮는 어두운 배경막입니다. */
 .detail-panel{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;z-index:100;padding:20px 16px 16px;gap:10px;flex-wrap:wrap}
+
+/* 상세 정보 카드 기능 : 원소의 자세한 정보를 담는 흰색 카드입니다. */
 .detail-card{background:#fff;border-radius:16px;width:100%;max-width:382px;max-height:calc(100vh - 70px);box-shadow:0 12px 40px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+
+/* 상세 카드 머리말 기능 : 카드 위쪽의 원소 기호 상자와 이름·번호·원자량 표시 영역입니다. */
 .detail-header{padding:12px 14px 10px;border-radius:16px 16px 0 0;flex-shrink:0;position:relative;display:flex;align-items:flex-start;gap:10px}
 .dh-sym-box{display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(0,0,0,0.12);flex-shrink:0}
 .detail-sym{font-weight:800;line-height:1;color:rgba(0,0,0,0.82)}
@@ -76,38 +114,58 @@ body{
 .detail-name{font-weight:700;color:#1a1a1a;line-height:1.1}
 .detail-sub{color:rgba(0,0,0,0.5);margin-top:3px;line-height:1.3}
 .detail-mass{color:rgba(0,0,0,0.45);margin-top:1px}
+
+/* 닫기 버튼 기능 : 카드 오른쪽 위의 ✕ 버튼 모양입니다. */
 .close-btn{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.12);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:rgba(0,0,0,0.5);line-height:1;flex-shrink:0}
 .close-btn:hover{background:rgba(0,0,0,0.2)}
+
+/* 상세 카드 본문 기능 : 스크롤되는 본문 영역과 가느다란 스크롤막대 모양입니다. */
 .detail-body{flex:1;overflow-y:auto;padding:10px 14px 12px;display:flex;flex-direction:column;gap:8px}
 .detail-body::-webkit-scrollbar{width:4px}
 .detail-body::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px}
+
+/* 핵심 수치 카드 기능 : 원자번호·원자량·주기/족·분류를 작은 카드 네 개로 보여 줍니다. */
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .stat-card{background:#f6f6f6;border-radius:10px;padding:7px 10px}
 .stat-label{font-size:11px;color:#999;font-weight:500}
 .stat-val{font-size:15px;font-weight:700;color:#1a1a1a;margin-top:2px}
+
+/* 설명·용도·발견 줄 기능 : 원소의 설명, 용도, 발견 정보를 줄 단위로 보여 줍니다. */
 .info-rows{display:flex;flex-direction:column;gap:0;border-radius:10px;overflow:hidden;border:1px solid #f0f0f0}
 .info-row{display:flex;gap:8px;padding:7px 10px;border-bottom:1px solid #f0f0f0;background:#fff}
 .info-row:last-child{border-bottom:none}
 .info-label{font-size:11px;color:#999;font-weight:600;min-width:32px;padding-top:1px;flex-shrink:0}
 .info-val{font-size:12px;color:#333;line-height:1.5}
+
+/* 원자 구조 영역 기능 : 전자 껍질 그림과 막대그래프를 담는 영역입니다. */
 .atom-section{display:flex;flex-direction:column;gap:10px}
 .atom-title{font-size:12px;font-weight:700;color:#444}
 .atom-visual{display:flex;gap:14px;align-items:center}
 .atom-canvas{display:block;flex-shrink:0;border-radius:50%}
+
+/* 전자 껍질 막대 기능 : 껍질별 전자 수를 가로 막대그래프로 나타냅니다. */
 .shell-bars{flex:1;display:flex;flex-direction:column;gap:6px}
 .shell-bar-row{display:flex;align-items:center;gap:7px}
 .shell-bar-label{font-size:11px;color:#888;font-weight:600;width:14px;text-align:right;flex-shrink:0}
 .shell-bar-track{flex:1;height:8px;background:#e8e8e8;border-radius:4px;overflow:hidden}
 .shell-bar-fill{height:100%;border-radius:4px;transition:width 0.5s ease}
 .shell-bar-count{font-size:11px;color:#555;font-weight:600;width:28px;text-align:right;flex-shrink:0}
+
+/* 전자 껍질 배치 칩 기능 : 껍질별 전자 수를 작은 알약 모양으로 나열하고, 총 전자 수를 적습니다. */
 .electron-chips{display:flex;flex-wrap:wrap;gap:5px}
 .e-chip{background:#f0f4ff;border:1px solid #d4dfff;border-radius:6px;padding:3px 8px;font-size:11px;color:#3a5bd9;font-weight:600}
 .e-total{font-size:11px;color:#999;margin-top:2px}
+
+/* 카드 바닥글 기능 : 카드 맨 아래의 발견 정보와 분류 배지입니다. */
 .detail-footer{display:flex;align-items:center;justify-content:space-between;padding:7px 14px 10px;flex-shrink:0;border-top:1px solid #f0f0f0}
 .footer-disc{font-size:11px;color:#aaa}
 .footer-cat-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;color:rgba(0,0,0,0.6)}
+
+/* 동작 버튼 영역 기능 : 복사·저장 버튼을 세로로 두되, 화면이 좁으면 가로로 배치합니다. */
 .action-panel{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
 @media(max-width:500px){.action-panel{flex-direction:row}}
+
+/* 복사·저장 버튼 기능 : 두 버튼의 모양과 색, 마우스 동작, 성공했을 때의 초록색 표시를 정합니다. */
 .action-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit;white-space:nowrap;min-width:110px}
 .action-btn.copy-btn{background:#f0f0f0;color:#444}
 .action-btn.copy-btn:hover{background:#e2e2e2}
@@ -115,8 +173,11 @@ body{
 .action-btn.save-btn:hover{background:#2c6fd4}
 .action-btn:active{transform:scale(0.96)}
 .action-btn.success{background:#22c55e!important;color:#fff!important}
+
+/* 안내 문구 기능 : 표 아래 도움말 문구의 스타일입니다. */
 .hint{margin-top:10px;text-align:center;color:rgba(100,80,30,0.7);font-style:italic}
 
+/* 원소탐험맵 버튼 기능 : 메인 지도로 돌아가는 홈 버튼의 노란색 모양입니다. */
 .map-btn{
   display:inline-flex;align-items:center;gap:5px;
   color:#3b1a00;font-weight:800;text-decoration:none;
@@ -132,10 +193,15 @@ body{
 </style>
 </head>
 <body>
+<!-- 주기율표 카드 시작 기능 : 제목·버튼·격자·계열 줄을 모두 담는 카드입니다. -->
 <div class="pt-wrap" id="pt-wrap">
+  <!-- 주기율표 제목 기능 : 카드 맨 위에 표시되는 제목입니다. -->
   <div class="pt-title">주기율표 탐험으로 배우는 원소</div>
+  <!-- 상단 버튼 줄 기능 : 홈 버튼과 분류 필터 버튼들이 들어가는 줄입니다. -->
   <div class="controls">
+    <!-- 원소탐험맵(HOME) 버튼 기능 : 누르면 메인 지도 페이지로 이동합니다. -->
     <a class="map-btn" id="mapBtn" href="https://lm99015-cyber.github.io/main_map/">🏠 원소탐험맵 (HOME)</a>
+    <!-- 분류 필터 버튼 기능 : 전체·금속·준금속·비금속 중 원하는 분류만 강조해 보여 줍니다. data-cat은 버튼이 맡은 분류 이름입니다. -->
     <div style="display:flex;gap:inherit;align-items:center">
     <button class="filter-btn active" data-cat="all" style="background:#f0f0f0">전체</button>
     <button class="filter-btn" data-cat="metal" style="background:#85B7EB"><span class="dot" style="background:#378ADD"></span>금속</button>
@@ -143,13 +209,16 @@ body{
     <button class="filter-btn" data-cat="nonmetal" style="background:#FAC775"><span class="dot" style="background:#BA7517"></span>비금속</button>
     </div>
   </div>
+  <!-- 주기율표 격자 자리 기능 : 자바스크립트가 이 빈 칸 안에 원소 격자를 만들어 채웁니다. -->
   <div class="table-scroll">
     <div id="pt-grid" class="pt-grid"></div>
   </div>
+  <!-- 란타넘족 줄 기능 : 본 표 아래에 따로 표시하는 57~71번 원소 줄입니다. -->
   <div class="series-section" id="series-lant">
     <div class="series-title" id="lant-title">란타넘족 (57–71)</div>
     <div class="series-row" id="lant-row"></div>
   </div>
+  <!-- 악티늄족 줄 기능 : 본 표 아래에 따로 표시하는 89~103번 원소 줄입니다. -->
   <div class="series-section" id="series-act">
     <div class="series-title" id="act-title">악티늄족 (89–103)</div>
     <div class="series-row" id="act-row1"></div>
@@ -157,8 +226,10 @@ body{
   </div>
 </div>
 
+<!-- 상세 정보 창 기능 : 원소를 클릭했을 때 나타나는 정보 창입니다. 평소에는 display:none으로 숨겨 둡니다. -->
 <div class="detail-panel" id="detail-panel" style="display:none">
   <div class="detail-card" id="detail-card">
+    <!-- 상세 창 머리말 기능 : 원소 기호 상자와 이름·번호·원자량을 보여 줍니다. -->
     <div class="detail-header" id="detail-header">
       <button class="close-btn" id="close-btn">✕</button>
       <div class="dh-sym-box" id="dh-sym-box"><div class="detail-sym" id="d-sym"></div></div>
@@ -169,18 +240,22 @@ body{
         <div class="detail-mass" id="d-mass-top"></div>
       </div>
     </div>
+    <!-- 상세 창 본문 기능 : 수치 카드, 설명·용도·발견, 원자 구조를 보여 줍니다. -->
     <div class="detail-body">
+      <!-- 핵심 수치 기능 : 원자번호·원자량·주기/족·분류 네 가지 수치입니다. -->
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-label">원자번호</div><div class="stat-val" id="d-num"></div></div>
         <div class="stat-card"><div class="stat-label">원자량</div><div class="stat-val" id="d-mass"></div></div>
         <div class="stat-card"><div class="stat-label">주기 / 족</div><div class="stat-val" id="d-pg"></div></div>
         <div class="stat-card"><div class="stat-label">분류</div><div class="stat-val" id="d-cat"></div></div>
       </div>
+      <!-- 설명·용도·발견 기능 : 원소에 대한 글 설명입니다. -->
       <div class="info-rows">
         <div class="info-row"><div class="info-label">설명</div><div class="info-val" id="d-desc"></div></div>
         <div class="info-row"><div class="info-label">용도</div><div class="info-val" id="d-uses"></div></div>
         <div class="info-row"><div class="info-label">발견</div><div class="info-val" id="d-disc"></div></div>
       </div>
+      <!-- 원자 구조 기능 : 전자 껍질 그림과 막대·칩으로 전자 배치를 보여 줍니다. -->
       <div class="atom-section">
         <div class="atom-title">원자 구조</div>
         <div class="atom-visual">
@@ -191,11 +266,13 @@ body{
         <div class="e-total" id="e-total"></div>
       </div>
     </div>
+    <!-- 상세 창 바닥글 기능 : 발견 정보와 분류 배지를 보여 줍니다. -->
     <div class="detail-footer">
       <div class="footer-disc" id="d-disc-footer"></div>
       <div class="footer-cat-badge" id="d-cat-badge"></div>
     </div>
   </div>
+  <!-- 동작 버튼 기능 : 정보를 클립보드에 복사하거나 PNG 이미지로 저장합니다. -->
   <div class="action-panel">
     <button class="action-btn copy-btn" id="copy-btn">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -210,6 +287,9 @@ body{
 
 <script>
 
+/* 원소 데이터 저장 기능 : 1번부터 118번까지 모든 원소의 정보를 담은 목록입니다.
+   각 원소마다 기호(sym), 이름(name), 원자번호(num), 원자량(mass), 주기(period), 족(group),
+   분류(cat), 전자 껍질 배치(e), 설명(desc), 용도(uses), 발견(disc)을 적어 두었습니다. */
 const ELEMENTS = [
   {sym:"H",name:"수소",num:1,mass:1.008,period:1,group:1,cat:"nonmetal",e:[1],desc:"가장 간단한 원소로, 우주에서 가장 풍부한 원소입니다.",uses:"연료전지, 암모니아 합성, 수소화 반응",disc:"1766년 헨리 캐번디시"},
   {sym:"He",name:"헬륨",num:2,mass:4.003,period:1,group:18,cat:"nonmetal",e:[2],desc:"불활성 기체로, 공기보다 가벼워 풍선에 사용됩니다.",uses:"풍선, 저온냉각, 호흡용 기체 혼합물",disc:"1868년 피에르 장센"},
@@ -331,16 +411,20 @@ const ELEMENTS = [
   {sym:"Og",name:"오가네손",num:118,mass:294.00,period:7,group:18,cat:"nonmetal",e:[2,8,18,32,32,18,8],desc:"유리 오가네시안의 이름을 딴 현재까지 발견된 가장 무거운 원소입니다.",uses:"과학 연구",disc:"2002년 두브나 연구소"},
 ];
 
+/* 분류별 색상·이름과 껍질 기호 저장 기능 : 금속·준금속·비금속의 칸 색과 한글 이름, 전자 껍질 이름(K~Q)을 정해 둡니다. activeFilter는 지금 선택된 필터를 기억하는 변수입니다. */
 const CAT_COLORS={metal:"#85B7EB",metalloid:"#C0DD97",nonmetal:"#FAC775"};
 const CAT_NAMES={metal:"금속",metalloid:"준금속",nonmetal:"비금속"};
 const SHELLS=['K','L','M','N','O','P','Q'];
 let activeFilter='all';
 
+/* 격자 기본 수치 저장 기능 : 주기 번호 칸 너비, 칸 사이 간격, 족 개수(18) 등 격자 계산에 쓰는 기본값입니다. */
 const PERIOD_LBL_W = 40;
 const GAP = 2;
 const NUM_GROUPS = 18;
 let cellSize = 36; // 전역 셀 크기 (positionMapBtn 등에서 참조)
 
+/* 화면 크기에 맞춘 칸 크기 계산 기능 : 창의 가로·세로에 맞춰 원소 칸 한 변의 크기를 정합니다.
+   표가 화면 밖으로 넘치지 않도록 가로·세로 양쪽을 모두 따져 가장 알맞은 크기를 찾아 줍니다. */
 function makeCellSize(){
   const vw = Math.max(
     document.documentElement.clientWidth,
@@ -386,8 +470,11 @@ function makeCellSize(){
   return size;
 }
 
+/* 분류별 칸 색상 반환 기능 : 원소의 분류(금속·준금속·비금속)에 맞는 색을 돌려줍니다. */
 function getColor(el){return CAT_COLORS[el.cat]||'#ccc';}
 
+/* 원소 칸 한 개 생성 기능 : 원소 정보로 칸 하나를 만들어 번호·기호·이름을 넣고, 클릭하면 상세 창이 열리도록 연결합니다.
+   원소가 없는 자리는 투명한 빈 칸으로 만듭니다. */
 function renderCell(el, size){
   const d = document.createElement('div');
   if(!el){
@@ -415,6 +502,8 @@ function renderCell(el, size){
   return d;
 }
 
+/* 주기율표 전체 그리기 기능 : 칸 크기를 정하고, 제목·버튼·글씨 크기를 화면에 맞춰 조정한 뒤,
+   본 표와 란타넘·악티늄족 줄을 모두 그립니다. */
 function renderGrid(){
   const size = makeCellSize();
   cellSize = size; // 전역 갱신
@@ -541,6 +630,8 @@ function renderGrid(){
   actRow2.innerHTML = '';
 }
 
+/* 상세 정보 표시 기능 : 클릭한 원소의 정보를 상세 창 곳곳에 채워 넣고,
+   전자 껍질 막대와 칩을 만든 뒤 창을 엽니다. */
 function showDetail(el){
   const color = getColor(el);
   const catName = CAT_NAMES[el.cat] || el.cat;
@@ -566,6 +657,7 @@ function showDetail(el){
   document.getElementById('d-uses').textContent = el.uses;
   document.getElementById('d-disc').textContent = el.disc;
 
+  // 전자 껍질 막대 : 껍질별 전자 수를 가로 막대로 만들고 차례로 늘어나는 효과를 줍니다.
   const maxE = Math.max(...el.e, 32);
   const shellBars = document.getElementById('shell-bars');
   shellBars.innerHTML = '';
@@ -584,6 +676,7 @@ function showDetail(el){
     });
   });
 
+  // 전자 껍질 칩 : 껍질별 전자 수를 작은 알약 모양으로 나열하고 총 전자 수를 적습니다.
   const chips = document.getElementById('e-chips');
   chips.innerHTML = '';
   el.e.forEach((cnt, i) => {
@@ -604,6 +697,7 @@ function showDetail(el){
   requestAnimationFrame(()=>drawAtom(el));
 }
 
+/* 원자 구조 그림 그리기 기능 : 캔버스에 원자핵과 전자 껍질 궤도, 껍질을 도는 전자들을 그립니다. */
 function drawAtom(el){
   const canvas = document.getElementById('atom-canvas');
   const ctx = canvas.getContext('2d');
@@ -644,10 +738,13 @@ function drawAtom(el){
   });
 }
 
+/* 닫기 버튼 동작 기능 : ✕ 버튼을 누르면 상세 창을 닫습니다. */
 document.getElementById('close-btn').addEventListener('click', ()=>{
   document.getElementById('detail-panel').style.display = 'none';
 });
 
+/* 복사 버튼 동작 기능 : 원소 정보를 표 모양(HTML)과 글자(텍스트) 두 형태로 클립보드에 복사합니다.
+   복사가 끝나면 버튼이 잠시 '복사됨!'으로 바뀝니다. */
 document.getElementById('copy-btn').addEventListener('click', async ()=>{
   const el = window._currentEl;
   if(!el) return;
@@ -778,6 +875,8 @@ ${divider}`;
   setTimeout(()=>{ btn.innerHTML = orig; btn.classList.remove('success'); }, 2000);
 });
 
+/* 저장 버튼 동작 기능 : 상세 카드를 그대로 PNG 이미지로 만들어 내려받습니다.
+   처음 누르면 화면 캡처 도구(html2canvas)를 먼저 인터넷에서 불러옵니다. */
 document.getElementById('save-btn').addEventListener('click', async ()=>{
   const el = window._currentEl;
   if(!el) return;
@@ -810,10 +909,12 @@ document.getElementById('save-btn').addEventListener('click', async ()=>{
   btn.innerHTML = origHTML; btn.disabled = false;
 });
 
+/* 바깥 클릭 닫기 기능 : 카드 바깥의 어두운 부분을 누르면 상세 창을 닫습니다. */
 document.getElementById('detail-panel').addEventListener('click', function(e){
   if(e.target === this) this.style.display = 'none';
 });
 
+/* 필터 버튼 동작 기능 : 분류 버튼을 누르면 그 버튼을 선택 상태로 바꾸고, 해당 분류만 강조해 표를 다시 그립니다. */
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', function(){
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -823,8 +924,10 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
+/* 첫 화면 그리기 기능 : 페이지가 열릴 때 주기율표를 한 번 그립니다. */
 renderGrid();
 
+/* 창 크기 변경 대응 기능 : 창 크기가 바뀌면 잠깐 기다렸다가 표를 다시 그리고, 열려 있는 원자 그림도 새로 그립니다. */
 let _resizeTimer;
 window.addEventListener('resize', ()=>{
   clearTimeout(_resizeTimer);
